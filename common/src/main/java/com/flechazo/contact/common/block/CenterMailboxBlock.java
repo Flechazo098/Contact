@@ -1,0 +1,75 @@
+package com.flechazo.contact.common.block;
+
+import com.flechazo.contact.Contact;
+import com.flechazo.contact.common.config.ContactCommonConfig;
+import com.flechazo.contact.common.inter.ISilveroakEntry;
+import com.flechazo.contact.common.storage.MailboxDataStorage;
+import com.google.common.collect.Lists;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.phys.BlockHitResult;
+
+import java.util.List;
+
+public class CenterMailboxBlock extends NormalHorizontalBlock implements ISilveroakEntry {
+    public CenterMailboxBlock() {
+        super(Properties.of().sound(SoundType.METAL));
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!level.isClientSide) {
+            if (ContactCommonConfig.isEnableCenterMailbox()) {
+                MailboxDataStorage data = MailboxDataStorage.getMailboxData(level.getServer());
+                if (data.getData().getMailboxPos(player.getUUID()) == null) {
+                    SimpleContainer contents = data.getData().getMailboxContents(player.getUUID());
+                    boolean isEmpty = true;
+                    for (int i = 0; i < contents.getContainerSize(); ++i) {
+                        if (!contents.getItem(i).isEmpty()) {
+                            player.getInventory().placeItemBackInInventory(contents.getItem(i));
+                            isEmpty = false;
+                        }
+                    }
+
+                    data.getData().resetMailboxContents(player.getUUID());
+                    if (!isEmpty) {
+                        player.displayClientMessage(Component.translatable("message.contact.mailbox.pick_up"), true);
+                    } else {
+                        player.displayClientMessage(Component.translatable("message.contact.mailbox.empty"), true);
+                    }
+                    data.setDirty();
+                    return InteractionResult.SUCCESS;
+                } else {
+                    player.displayClientMessage(Component.translatable("message.contact.mailbox.deny"), true);
+                }
+            } else {
+                player.displayClientMessage(Component.translatable("message.contact.mailbox.disabled"), true);
+            }
+            return InteractionResult.FAIL;
+        }
+        return InteractionResult.SUCCESS;
+    }
+
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+        return Lists.newArrayList(new ItemStack(this));
+    }
+
+    @Override
+    public ResourceLocation getRegistryID() {
+        return Contact.getRL("center_mailbox");
+    }
+}

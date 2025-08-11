@@ -1,0 +1,140 @@
+package com.flechazo.contact.helper;
+
+import com.flechazo.contact.client.gui.hud.TexturePos;
+import com.flechazo.contact.client.widget.IconButton;
+import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Transformation;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
+
+import java.text.DecimalFormat;
+import java.util.List;
+import java.util.Optional;
+
+public final class GuiHelper {
+    public static void drawTexturedModalRect(PoseStack poseStack, int x, int y, int u, int v, int width, int height, float zLevel) {
+        final float uScale = 1f / 0x100;
+        final float vScale = 1f / 0x100;
+
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder wr = tesselator.getBuilder();
+        wr.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        Matrix4f matrix = poseStack.last().pose();
+        wr.vertex(matrix, x, y + height, zLevel).uv(u * uScale, ((v + height) * vScale)).endVertex();
+        wr.vertex(matrix, x + width, y + height, zLevel).uv((u + width) * uScale, ((v + height) * vScale)).endVertex();
+        wr.vertex(matrix, x + width, y, zLevel).uv((u + width) * uScale, (v * vScale)).endVertex();
+        wr.vertex(matrix, x, y, zLevel).uv(u * uScale, (v * vScale)).endVertex();
+        tesselator.end();
+    }
+
+    public static void drawLayer(PoseStack poseStack, int x, int y, TexturePos pos, int z) {
+        drawTexturedModalRect(poseStack, x, y, pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), z);
+    }
+
+    public static void drawLayer(PoseStack poseStack, int x, int y, TexturePos pos) {
+        drawTexturedModalRect(poseStack, x, y, pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), 0);
+    }
+
+    public static void drawLayer(GuiGraphics guiGraphics, int x, int y, ResourceLocation rl, TexturePos pos) {
+        guiGraphics.blit(rl, x, y, pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight());
+    }
+
+    public static void drawLayerBySize(GuiGraphics guiGraphics, ResourceLocation rl, int x, int y, TexturePos pos, int textureWidth, int textureHeight) {
+        guiGraphics.blit(rl, x, y, pos.getWidth(), pos.getHeight(), pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), textureWidth, textureHeight);
+    }
+
+    public static void drawLayerBySize(GuiGraphics guiGraphics, ResourceLocation rl, int x, int y, TexturePos pos) {
+        drawLayerBySize(guiGraphics, rl, x, y, pos, pos.getWidth(), pos.getHeight());
+    }
+
+    public static void renderIconButton(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY, int z, ResourceLocation texture, IconButton button, TexturePos normalPos, TexturePos hoveredPos, TexturePos pressedPos) {
+        RenderSystem.enableBlend();
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, texture);
+        if (button.isPressed()) {
+            GuiHelper.drawLayer(guiGraphics.pose(), button.getX(), button.getY(), pressedPos);
+            RenderSystem.disableBlend();
+            return;
+        } else if (button.isHovered()) {
+            GuiHelper.drawLayer(guiGraphics.pose(), button.getX(), button.getY(), hoveredPos);
+            RenderSystem.disableBlend();
+            return;
+        }
+
+        GuiHelper.drawLayer(guiGraphics.pose(), button.getX(), button.getY(), normalPos);
+        RenderSystem.disableBlend();
+
+        button.render(guiGraphics, mouseX, mouseY, partialTicks);
+    }
+
+    public static void renderButton(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY, int z, ResourceLocation texture, Button button, TexturePos normalPos, TexturePos hoveredPos) {
+        RenderSystem.enableBlend();
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, texture);
+
+        if (button.isHovered()) {
+            GuiHelper.drawLayer(guiGraphics.pose(), button.getX(), button.getY(), hoveredPos);
+        } else {
+            GuiHelper.drawLayer(guiGraphics.pose(), button.getX(), button.getY(), normalPos);
+        }
+        RenderSystem.disableBlend();
+
+        button.render(guiGraphics, mouseX, mouseY, partialTicks);
+    }
+
+
+    public static void drawTransparentStringDefault(Font font, String text, float x, float y, int color, boolean shadow) {
+        drawSpecialString(font, text, x, y, color, shadow, true, 0, 15728880);
+    }
+
+    public static void drawSpecialString(Font font, String text, float x, float y, int color, boolean shadow, boolean transparent, int colorBackground, int packedLight) {
+        MultiBufferSource.BufferSource iRenderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        font.drawInBatch(text, x, y, color, shadow, Transformation.identity().getMatrix(), iRenderTypeBuffer, transparent ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, colorBackground, packedLight);
+        iRenderTypeBuffer.endBatch();
+    }
+
+    public static void drawTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY, int x, int y, int weight, int height, List<Component> list) {
+        if (x <= mouseX && mouseX <= x + weight && y <= mouseY && mouseY <= y + height) {
+            guiGraphics.renderTooltip(Minecraft.getInstance().font, list, Optional.empty(), mouseX, mouseY);
+        }
+    }
+
+    public static void drawFluidTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY, int x, int y, int width, int height, Component name, int amount) {
+        if (amount != 0) {
+            List<Component> list = Lists.newArrayList(name);
+            DecimalFormat df = new DecimalFormat("#,###");
+            list.add(Component.literal(df.format(amount) + " mB").withStyle(ChatFormatting.GRAY));
+            drawTooltip(guiGraphics, mouseX, mouseY, x, y, width, height, list);
+        }
+    }
+
+
+    private static float getCorrespondingUV(float min, float max, int uv) {
+        return min + (max - min) * uv / 16;
+    }
+
+    static void innerBlit(int x0, int x1, int y0, int y1, int z, float u0, float u1, float v0, float v1) {
+        RenderSystem.enableBlend();
+
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder buffer = tesselator.getBuilder();
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        buffer.vertex(x0, y1, z).uv(u0, v1).endVertex();
+        buffer.vertex(x1, y1, z).uv(u1, v1).endVertex();
+        buffer.vertex(x1, y0, z).uv(u1, v0).endVertex();
+        buffer.vertex(x0, y0, z).uv(u0, v0).endVertex();
+        tesselator.end();
+
+        RenderSystem.disableBlend();
+    }
+}
