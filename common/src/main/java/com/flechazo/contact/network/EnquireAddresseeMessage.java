@@ -6,8 +6,9 @@ import com.flechazo.contact.common.handler.MailboxManager;
 import com.flechazo.contact.common.item.IPackageItem;
 import com.flechazo.contact.common.item.PostcardItem;
 import com.flechazo.contact.common.screenhandler.PostboxScreenHandler;
+import com.flechazo.contact.common.storage.IMailboxDataProvider;
 import com.flechazo.contact.common.storage.MailToBeSent;
-import com.flechazo.contact.common.storage.MailboxDataStorage;
+import com.flechazo.contact.common.storage.MailboxDataManager;
 import com.mafuyu404.oelib.api.net.INetworkContext;
 import com.mafuyu404.oelib.api.net.NetworkPacket;
 import com.mafuyu404.oelib.api.net.Side;
@@ -50,7 +51,7 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
             return;
         }
 
-        MailboxDataStorage data = MailboxDataStorage.getMailboxData(player.server);
+        IMailboxDataProvider data = MailboxDataManager.getData(player.server);
         String lowerIn = nameIn.toLowerCase(Locale.ROOT);
 
         if (lowerIn.equals("@e") && player.server.getProfilePermissions(player.getGameProfile()) >= 2) {
@@ -62,15 +63,14 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
         handleNormalEnquiry(player, data, lowerIn);
     }
 
-    private void handleAdminBroadcast(ServerPlayer player, MailboxDataStorage data) {
+    private void handleAdminBroadcast(ServerPlayer player, IMailboxDataProvider data) {
         if (shouldSend) {
             if (player.containerMenu instanceof PostboxScreenHandler container) {
                 ItemStack parcel = container.parcel.getItem(0).copy();
                 parcel.getOrCreateTag().putString("Sender", player.getName().getString());
 
-                for (UUID uuid : data.getData().nameToUUID.values()) {
-                    data.getData().mailList.add(new MailToBeSent(uuid, parcel.copy(), 0));
-                    data.setDirty();
+                for (UUID uuid : data.getNameToUUID().values()) {
+                    data.getMailList().add(new MailToBeSent(uuid, parcel.copy(), 0));
                 }
 
                 ActionMessage.create(1).sendTo(player);
@@ -85,9 +85,9 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
         }
     }
 
-    private void handleNormalEnquiry(ServerPlayer player, MailboxDataStorage data, String lowerIn) {
+    private void handleNormalEnquiry(ServerPlayer player, IMailboxDataProvider data, String lowerIn) {
         List<String> names = new ArrayList<>();
-        for (String name : data.getData().nameToUUID.keySet()) {
+        for (String name : data.getNameToUUID().keySet()) {
             if (name.toLowerCase(Locale.ROOT).startsWith(lowerIn)) {
                 names.add(name);
             }
@@ -98,13 +98,13 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
 
         List<Integer> ticks = new ArrayList<>();
         for (String name : names) {
-            UUID uuid = data.getData().nameToUUID.get(name);
-            if (data.getData().isMailboxFull(uuid)) {
+            UUID uuid = data.getNameToUUID().get(name);
+            if (data.isMailboxFull(uuid)) {
                 ticks.add(-1);
                 continue;
             }
 
-            GlobalPos mailboxPos = data.getData().getMailboxPos(uuid);
+            GlobalPos mailboxPos = data.getMailboxPos(uuid);
             if (player.containerMenu instanceof PostboxScreenHandler) {
                 int tick = 0;
                 if (!((PostboxScreenHandler) player.containerMenu).isEnderMail()) {
@@ -138,7 +138,7 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
         }
     }
 
-    private void handleSendMail(ServerPlayer player, MailboxDataStorage data, String recipientName, int deliveryTicks) {
+    private void handleSendMail(ServerPlayer player, IMailboxDataProvider data, String recipientName, int deliveryTicks) {
         PostboxScreenHandler container = (PostboxScreenHandler) player.containerMenu;
         ItemStack parcel = container.parcel.getItem(0);
         parcel.getOrCreateTag().putString("Sender", player.getName().getString());
@@ -152,8 +152,8 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
             );
         }
 
-        UUID uuid = data.getData().nameToUUID.get(recipientName);
-        GlobalPos mailboxPos = data.getData().getMailboxPos(uuid);
+        UUID uuid = data.getNameToUUID().get(recipientName);
+        GlobalPos mailboxPos = data.getMailboxPos(uuid);
 
         if (mailboxPos != null) {
             if (mailboxPos.dimension() != player.level().dimension()) {
@@ -165,7 +165,7 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
             }
         }
 
-        data.getData().mailList.add(new MailToBeSent(uuid, parcel, deliveryTicks));
+        data.getMailList().add(new MailToBeSent(uuid, parcel, deliveryTicks));
         ActionMessage.create(1).sendTo(player);
         container.parcel.setItem(0, ItemStack.EMPTY);
     }

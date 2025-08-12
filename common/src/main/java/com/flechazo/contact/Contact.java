@@ -54,17 +54,6 @@ public final class Contact {
     }
 
     public static void initFabric() {
-        ConfigManager.getInstance().registerConfigHandler(ContactCommonConfig.INSTANCE);
-        ConfigManager.getInstance().registerServerConfig(ContactCommonConfig.INSTANCE, ServerConfigManager.PermissionChecker.IS_OPERATOR);
-        RegistryManager.initialize();
-        BlockRegistry.initBlocks();
-        ItemRegistry.initItems();
-        EntityTypeRegistry.init();
-        ScreenHandlerTypeRegistry.init();
-        BlockEntityTypeRegistry.init();
-        PostcardDataManager.initialize();
-        NetworkManager.registerPackets(ActionMessage.class, EnquireAddresseeMessage.class, PostcardEditMessage.class, TextBoxEditMessage.class);
-        ModCreativeTabRegistry.initialize();
         CommandRegistrationEvent.EVENT.register(ContactCommand::register);
         TickEvent.SERVER_PRE.register(MailboxManager::onServerTick);
         InteractionEvent.INTERACT_ENTITY.register(WanderingTraderSaleHandler::interact);

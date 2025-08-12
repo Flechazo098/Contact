@@ -80,7 +80,7 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
     private void send() {
         if (menu.status == 1) {
             if (isAddresseeValid() && menu.ticks.get(0) >= 0) {
-                EnquireAddresseeMessage packet = EnquireAddresseeMessage.create(menu.playerName, false);
+                EnquireAddresseeMessage packet = EnquireAddresseeMessage.create(menu.playerName, true);
                 packet.sendToServer();
             }
         } else if (menu.status == 2) {

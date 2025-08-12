@@ -37,6 +37,14 @@ dependencies {
     modImplementation "curse.maven:oelib-1319210:6875022"
     modImplementation   "curse.maven:jupiter-1072905:6843040"
 
+    // Replace modImplementation with modApi if you expose components in your own API
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}"
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-world:${project.cca_version}"
+    // Copy the following only if you want to bundle Cardinal Components API as a Jar-in-Jar dependency
+    // (otherwise, you should configure the dependency on Modrinth/Curseforge)
+    include "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}"
+    include "dev.onyxstudios.cardinal-components-api:cardinal-components-world:${project.cca_version}"
+
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 }

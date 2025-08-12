@@ -1,5 +1,6 @@
 package com.flechazo.contact.platform;
 
+import com.flechazo.contact.common.storage.IMailboxDataProvider;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.block.Block;
@@ -19,5 +20,9 @@ public class PlatformHelper {
 
     public static void setRenderLayer(Supplier<Block> block) {
         getPlatformService().setRenderLayer(block);
+    }
+
+    public static IMailboxDataProvider getMailboxDataProvider(MinecraftServer server) {
+        return getPlatformService().getMailboxDataProviderImpl(server);
     }
 }

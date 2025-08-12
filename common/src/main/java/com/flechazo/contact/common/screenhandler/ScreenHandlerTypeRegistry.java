@@ -16,11 +16,11 @@ public final class ScreenHandlerTypeRegistry {
 
     public static final RegistrySupplier<MenuType<EnvelopeScreenHandler>> ENVELOPE_CONTAINER =
             RegistryManager.MENU_TYPES.register("envelope",
-                    () -> new MenuType<>(EnvelopeScreenHandler::new, FeatureFlags.DEFAULT_FLAGS));
+                    () -> new MenuType<>(EnvelopeScreenHandler::new, FeatureFlags.VANILLA_SET));
 
     public static final RegistrySupplier<MenuType<RedPacketEnvelopeScreenHandler>> RED_PACKET_ENVELOPE_CONTAINER =
             RegistryManager.MENU_TYPES.register("red_packet_envelope",
-                    () -> new MenuType<>(RedPacketEnvelopeScreenHandler::new, FeatureFlags.DEFAULT_FLAGS));
+                    () -> new MenuType<>(RedPacketEnvelopeScreenHandler::new, FeatureFlags.VANILLA_SET));
 
 
     public final static RegistrySupplier<MenuType<PostboxScreenHandler>> RED_POSTBOX_CONTAINER =

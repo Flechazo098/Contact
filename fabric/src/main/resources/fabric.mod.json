@@ -19,6 +19,9 @@
     ],
     "client": [
       "com.flechazo.contact.fabric.client.ContactFabricClient"
+    ],
+    "cardinal-components": [
+      "com.flechazo.contact.fabric.capability.ContactComponents"
     ]
   },
   "accessWidener": "contact.accesswidener",
@@ -30,6 +33,11 @@
     "java": ">=17",
     "architectury": ">=9.2.14",
     "fabric-api": "*"
+  },
+  "custom": {
+    "cardinal-components": [
+      "contact:mailbox_data"
+    ]
   },
   "suggests": {
     "another-mod": "*"

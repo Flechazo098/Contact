@@ -4,8 +4,9 @@ import com.flechazo.contact.common.command.arguments.PostcardStyleArgument;
 import com.flechazo.contact.common.item.ItemRegistry;
 import com.flechazo.contact.common.item.ParcelItem;
 import com.flechazo.contact.common.item.PostcardItem;
+import com.flechazo.contact.common.storage.IMailboxDataProvider;
 import com.flechazo.contact.common.storage.MailToBeSent;
-import com.flechazo.contact.common.storage.MailboxDataStorage;
+import com.flechazo.contact.common.storage.MailboxDataManager;
 import com.flechazo.contact.platform.PlatformHelper;
 import com.flechazo.contact.resourse.PostcardDataManager;
 import com.google.common.collect.Sets;
@@ -42,8 +43,8 @@ public class ContactCommand {
         MinecraftServer server = PlatformHelper.getCurrentServer();
         Set<String> set = Sets.newHashSet();
         if (server != null) {
-            MailboxDataStorage data = MailboxDataStorage.getMailboxData(server);
-            set.addAll(data.getData().nameToUUID.keySet());
+            IMailboxDataProvider data = MailboxDataManager.getData(server);
+            set.addAll(data.getNameToUUID().keySet());
         }
         set.add("\"@e\"");
         return SharedSuggestionProvider.suggest(set, builder);
@@ -246,13 +247,12 @@ public class ContactCommand {
     }
 
     private static void deliverToPlayerMailbox(CommandSourceStack source, String target, int ticks, AtomicInteger n, ItemStack parcel) {
-        MailboxDataStorage data = MailboxDataStorage.getMailboxData(source.getServer());
-        UUID uuid = data.getData().nameToUUID.get(target);
+        IMailboxDataProvider data = MailboxDataManager.getData(source.getServer());
+        UUID uuid = data.getNameToUUID().get(target);
         if (uuid != null) {
-            if (!data.getData().isMailboxFull(uuid)) {
-                data.getData().mailList.add(new MailToBeSent(uuid, parcel, ticks));
+            if (!data.isMailboxFull(uuid)) {
+                data.getMailList().add(new MailToBeSent(uuid, parcel, ticks));
                 n.getAndIncrement();
-                data.setDirty();
             } else {
                 source.sendSuccess(() -> Component.translatable("command.contact.deliver.full", target), true);
             }
@@ -267,9 +267,8 @@ public class ContactCommand {
         }
         ItemStack parcel = ParcelItem.getParcel(contents, isEnder, sender);
         if (target.equals("@e")) {
-            MailboxDataStorage data = MailboxDataStorage.getMailboxData(source.getServer());
-            data.getData().nameToUUID.keySet().forEach(name -> deliverToPlayerMailbox(source, name, ticks, n, parcel));
-            data.setDirty();
+            IMailboxDataProvider data = MailboxDataManager.getData(source.getServer());
+            data.getNameToUUID().keySet().forEach(name -> deliverToPlayerMailbox(source, name, ticks, n, parcel));
         } else {
             deliverToPlayerMailbox(source, target, ticks, n, parcel);
         }
@@ -306,8 +305,8 @@ public class ContactCommand {
         if (target.equals("@e")) {
             ItemStack postcard = PostcardItem.setText(PostcardItem.getPostcard(id, isEnder), text);
             postcard.getOrCreateTag().putString("Sender", sender);
-            MailboxDataStorage data = MailboxDataStorage.getMailboxData(source.getServer());
-            data.getData().nameToUUID.keySet().forEach(name -> deliverToPlayerMailbox(source, name, ticks, n, postcard));
+            IMailboxDataProvider data = MailboxDataManager.getData(source.getServer());
+            data.getNameToUUID().keySet().forEach(name -> deliverToPlayerMailbox(source, name, ticks, n, postcard));
         } else {
             ItemStack postcard = PostcardItem.setText(PostcardItem.getPostcard(id, false), text);
             postcard.getOrCreateTag().putString("Sender", sender);

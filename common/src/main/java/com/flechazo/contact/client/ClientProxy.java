@@ -45,7 +45,7 @@ public class ClientProxy {
         }
     }
 
-    public static void onInitializeClient() {
+        public static void onInitializeClient() {
         ConfigManager.getInstance().registerConfigHandler(ContactClientConfig.INSTANCE);
         ScreenHandlerTypeRegistry.clientInit();
         ClientProxy.bindEntityRenderer();

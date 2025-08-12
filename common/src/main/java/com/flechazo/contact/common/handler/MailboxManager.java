@@ -1,8 +1,9 @@
 package com.flechazo.contact.common.handler;
 
 import com.flechazo.contact.common.config.ContactCommonConfig;
+import com.flechazo.contact.common.storage.IMailboxDataProvider;
 import com.flechazo.contact.common.storage.MailToBeSent;
-import com.flechazo.contact.common.storage.MailboxDataStorage;
+import com.flechazo.contact.common.storage.MailboxDataManager;
 import com.flechazo.contact.common.storage.PlayerMailboxData;
 import com.flechazo.contact.common.tileentity.MailboxBlockEntity;
 import com.flechazo.contact.platform.PlatformHelper;
@@ -24,27 +25,26 @@ public final class MailboxManager {
     private static int updateTick = 0;
 
     public static void onServerTick(MinecraftServer server) {
-        MailboxDataStorage data = MailboxDataStorage.getMailboxData(server);
+        IMailboxDataProvider data = MailboxDataManager.getData(server);
         updateTick = ++updateTick % 20;
         if (updateTick == 0) {
-            for (MailToBeSent mail : data.getData().mailList) {
+            for (MailToBeSent mail : data.getMailList()) {
                 mail.tick(20);
                 if (mail.isReady()) {
                     UUID uuid = mail.getUUID();
-                    if (data.getData().addMailboxContents(uuid, mail.getContents())) {
+                    if (data.addMailboxContents(uuid, mail.getContents())) {
                         Player player = server.getPlayerList().getPlayer(uuid);
                         if (player != null) {
                             player.displayClientMessage(Component.translatable("message.contact.mailbox.new_mail"), false);
                         }
-                        updateState(uuid, data.getData());
+                        updateState(uuid, data.data());
                         READY_TO_REMOVE.add(mail);
                     }
                 }
             }
             if (!READY_TO_REMOVE.isEmpty()) {
-                data.getData().mailList.removeAll(READY_TO_REMOVE);
+                data.getMailList().removeAll(READY_TO_REMOVE);
                 READY_TO_REMOVE.clear();
-                data.setDirty();
             }
         }
     }

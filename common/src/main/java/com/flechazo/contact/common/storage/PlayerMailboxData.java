@@ -154,7 +154,7 @@ public class PlayerMailboxData {
 
             GlobalPos globalPos = uuidToLocation.get(uuid);
             if (globalPos != null) {
-                ResourceLocation.CODEC.encodeStart(NbtOps.INSTANCE, globalPos.dimension().location()).resultOrPartial(LogManager.getLogger()::error).ifPresent(world -> tag.put("MailboxDimension", world));
+                ResourceLocation.CODEC.encodeStart(NbtOps.INSTANCE, globalPos.dimension().location()).resultOrPartial(LogManager.getLogger()::error).ifPresent(world -> compoundTag.put("MailboxDimension", world));
                 compoundTag.putInt("MailboxX", globalPos.pos().getX());
                 compoundTag.putInt("MailboxY", globalPos.pos().getY());
                 compoundTag.putInt("MailboxZ", globalPos.pos().getZ());
@@ -195,7 +195,7 @@ public class PlayerMailboxData {
             uuidToContents.put(uuid, contents);
 
             if (compoundTag.contains("MailboxDimension")) {
-                BlockPos mailboxPos = new BlockPos(compoundTag.getInt("MailboxX"), compoundTag.getInt("MailboxY"), tag.getInt("MailboxZ"));
+                BlockPos mailboxPos = new BlockPos(compoundTag.getInt("MailboxX"), compoundTag.getInt("MailboxY"), compoundTag.getInt("MailboxZ"));
                 ResourceKey<Level> mailboxWorld = Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, compoundTag.get("MailboxDimension")).resultOrPartial(LogManager.getLogger()::error).orElse(Level.OVERWORLD);
                 GlobalPos globalPos = GlobalPos.of(mailboxWorld, mailboxPos);
                 uuidToLocation.put(uuid, globalPos);

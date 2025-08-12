@@ -4,10 +4,12 @@ import com.flechazo.contact.Contact;
 import com.flechazo.contact.common.inter.ISilveroakEntry;
 import com.flechazo.contact.common.screenhandler.PostboxScreenHandler;
 import com.flechazo.contact.helper.VoxelShapeHelper;
+import dev.architectury.registry.menu.MenuRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -46,14 +48,22 @@ public class PostboxBlock extends DoubleHorizontalBlock implements ISilveroakEnt
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!level.isClientSide) {
-            player.openMenu(getContainer(isRed));
+            if (player instanceof ServerPlayer sp) {
+                MenuRegistry.openExtendedMenu(sp,
+                        getContainer(isRed),
+                        buf -> buf.writeBoolean(isRed)
+                );
+            }
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.SUCCESS;
     }
 
     public static MenuProvider getContainer(boolean isRed) {
-        return new SimpleMenuProvider((id, inventory, player) -> new PostboxScreenHandler(id, inventory, isRed), CONTAINER_NAME);
+        return new SimpleMenuProvider(
+                (id, inventory, player) -> new PostboxScreenHandler(id, inventory, isRed),
+                CONTAINER_NAME
+        );
     }
 
     static {

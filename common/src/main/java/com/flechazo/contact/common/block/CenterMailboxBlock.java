@@ -3,7 +3,8 @@ package com.flechazo.contact.common.block;
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.common.config.ContactCommonConfig;
 import com.flechazo.contact.common.inter.ISilveroakEntry;
-import com.flechazo.contact.common.storage.MailboxDataStorage;
+import com.flechazo.contact.common.storage.IMailboxDataProvider;
+import com.flechazo.contact.common.storage.MailboxDataManager;
 import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -31,9 +32,9 @@ public class CenterMailboxBlock extends NormalHorizontalBlock implements ISilver
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!level.isClientSide) {
             if (ContactCommonConfig.isEnableCenterMailbox()) {
-                MailboxDataStorage data = MailboxDataStorage.getMailboxData(level.getServer());
-                if (data.getData().getMailboxPos(player.getUUID()) == null) {
-                    SimpleContainer contents = data.getData().getMailboxContents(player.getUUID());
+                IMailboxDataProvider data = MailboxDataManager.getData(level);
+                if (data.getMailboxPos(player.getUUID()) == null) {
+                    SimpleContainer contents = data.getMailboxContents(player.getUUID());
                     boolean isEmpty = true;
                     for (int i = 0; i < contents.getContainerSize(); ++i) {
                         if (!contents.getItem(i).isEmpty()) {
@@ -42,13 +43,12 @@ public class CenterMailboxBlock extends NormalHorizontalBlock implements ISilver
                         }
                     }
 
-                    data.getData().resetMailboxContents(player.getUUID());
+                    data.resetMailboxContents(player.getUUID());
                     if (!isEmpty) {
                         player.displayClientMessage(Component.translatable("message.contact.mailbox.pick_up"), true);
                     } else {
                         player.displayClientMessage(Component.translatable("message.contact.mailbox.empty"), true);
                     }
-                    data.setDirty();
                     return InteractionResult.SUCCESS;
                 } else {
                     player.displayClientMessage(Component.translatable("message.contact.mailbox.deny"), true);
@@ -60,7 +60,6 @@ public class CenterMailboxBlock extends NormalHorizontalBlock implements ISilver
         }
         return InteractionResult.SUCCESS;
     }
-
 
     @Override
     @SuppressWarnings("deprecation")

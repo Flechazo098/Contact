@@ -6,7 +6,8 @@ import com.flechazo.contact.common.handler.MailboxManager;
 import com.flechazo.contact.common.inter.ISilveroakEntry;
 import com.flechazo.contact.common.item.IMailItem;
 import com.flechazo.contact.common.item.PostcardItem;
-import com.flechazo.contact.common.storage.MailboxDataStorage;
+import com.flechazo.contact.common.storage.IMailboxDataProvider;
+import com.flechazo.contact.common.storage.MailboxDataManager;
 import com.flechazo.contact.common.tileentity.MailboxBlockEntity;
 import com.flechazo.contact.helper.VoxelShapeHelper;
 import com.flechazo.contact.platform.PlatformHelper;
@@ -97,27 +98,26 @@ public class MailboxBlock extends DoubleHorizontalBlock implements EntityBlock, 
     @SuppressWarnings("deprecation")
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
         if (!level.isClientSide) {
-            MailboxDataStorage data = MailboxDataStorage.getMailboxData(level.getServer());
+            IMailboxDataProvider data = MailboxDataManager.getData(level);
             BlockPos topPos = state.getValue(HALF) == DoubleBlockHalf.UPPER ? pos : pos.above();
-            UUID mailboxOwner = data.getData().getMailboxOwner(level.dimension(), topPos);
+            UUID mailboxOwner = data.getMailboxOwner(level.dimension(), topPos);
             if (player.isShiftKeyDown()) {
                 // 检查邮箱主人，没有的话，录入
                 if (mailboxOwner == null) {
-                    if (data.getData().getMailboxPos(player.getUUID()) == null) {
+                    if (data.getMailboxPos(player.getUUID()) == null) {
                         player.displayClientMessage(Component.translatable("message.contact.mailbox.binding"), true);
                     } else {
                         player.displayClientMessage(Component.translatable("message.contact.mailbox.switch"), true);
                     }
-                    data.getData().setMailboxData(player.getUUID(), level.dimension(), topPos);
+                    data.setMailboxData(player.getUUID(), level.dimension(), topPos);
                     MailboxManager.updateState(level, topPos);
                     AdvancementManager.givePlayerAdvancement(level.getServer(), (ServerPlayer) player, new ResourceLocation("contact:root"));
-                    data.setDirty();
                     return InteractionResult.SUCCESS;
                 }
             }
-            if (Objects.equals(mailboxOwner, player.getAbilities())) {
+            if (Objects.equals(mailboxOwner, player.getUUID())) {
                 // 获取邮件
-                SimpleContainer contents = data.getData().getMailboxContents(mailboxOwner);
+                SimpleContainer contents = data.getMailboxContents(mailboxOwner);
                 boolean isEmpty = true;
                 for (int i = 0; i < contents.getContainerSize(); ++i) {
                     ItemStack parcel = contents.getItem(i);
@@ -134,24 +134,23 @@ public class MailboxBlock extends DoubleHorizontalBlock implements EntityBlock, 
                     }
                 }
                 // 腾空邮件列表
-                data.getData().resetMailboxContents(mailboxOwner);
+                data.resetMailboxContents(mailboxOwner);
                 if (!isEmpty) {
                     player.displayClientMessage(Component.translatable("message.contact.mailbox.pick_up"), true);
                 } else {
                     player.displayClientMessage(Component.translatable("message.contact.mailbox.empty"), true);
                 }
                 MailboxManager.updateState(level, topPos);
-                data.setDirty();
                 return InteractionResult.SUCCESS;
             } else if (player.getItemInHand(handIn).getItem() instanceof IMailItem) {
                 if (mailboxOwner != null) {
                     ItemStack held = player.getItemInHand(handIn).copy();
                     if (!held.getOrCreateTag().contains("Sender")) {
                         // 不是主人的话，如果有包裹和明信片，那么塞进去
-                        if (!data.getData().isMailboxFull(mailboxOwner)) {
+                        if (!data.isMailboxFull(mailboxOwner)) {
                             if (level.getBlockEntity(topPos) instanceof MailboxBlockEntity mailbox && mailbox.checkToSend()) {
                                 held.getOrCreateTag().putString("Sender", player.getName().getString());
-                                data.getData().addMailboxContents(mailboxOwner, held);
+                                data.addMailboxContents(mailboxOwner, held);
                                 player.setItemInHand(handIn, ItemStack.EMPTY);
                                 player.displayClientMessage(Component.translatable("message.contact.mailbox.deliver"), true);
                                 AdvancementManager.givePlayerAdvancement(player.getServer(), (ServerPlayer) player, new ResourceLocation("contact:send_in_person"));
@@ -165,12 +164,10 @@ public class MailboxBlock extends DoubleHorizontalBlock implements EntityBlock, 
                     } else {
                         player.displayClientMessage(Component.translatable("message.contact.mailbox.used"), true);
                     }
-                    data.setDirty();
                     return InteractionResult.SUCCESS;
                 } else {
                     player.displayClientMessage(Component.translatable("message.contact.mailbox.no_owner"), true);
                 }
-                data.setDirty();
                 return InteractionResult.SUCCESS;
             } else if (mailboxOwner != null) {
                 PlatformHelper.getCurrentServer().getProfileCache().get(mailboxOwner).ifPresent(gameProfile ->
@@ -187,10 +184,9 @@ public class MailboxBlock extends DoubleHorizontalBlock implements EntityBlock, 
     public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         super.playerWillDestroy(level, pos, state, player);
         if (!level.isClientSide) {
-            MailboxDataStorage data = MailboxDataStorage.getMailboxData(level.getServer());
+            IMailboxDataProvider data = MailboxDataManager.getData(level);
             BlockPos topPos = state.getValue(HALF) == DoubleBlockHalf.UPPER ? pos : pos.above();
-            data.getData().removeMailboxData(GlobalPos.of(level.dimension(), topPos));
-            data.setDirty();
+            data.removeMailboxData(GlobalPos.of(level.dimension(), topPos));
         }
     }
 

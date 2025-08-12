@@ -26,6 +26,10 @@ allprojects {
                 includeGroup "curse.maven"
             }
         }
+        maven {
+            name = "Ladysnake Mods"
+            url = 'https://maven.ladysnake.org/releases'
+        }
     }
 }
 

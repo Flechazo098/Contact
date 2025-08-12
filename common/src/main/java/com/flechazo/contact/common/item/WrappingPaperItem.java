@@ -2,8 +2,10 @@ package com.flechazo.contact.common.item;
 
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.common.screenhandler.WrappingPaperScreenHandler;
+import dev.architectury.registry.menu.MenuRegistry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
@@ -23,7 +25,13 @@ public class WrappingPaperItem extends NormalItem {
     public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
         ItemStack itemStack = user.getItemInHand(hand);
         if (!world.isClientSide) {
-            user.openMenu(getContainer(itemStack.getItem() == ItemRegistry.ENDER_WRAPPING_PAPER));
+            if (user instanceof ServerPlayer sp) {
+                boolean isEnder = itemStack.getItem() == ItemRegistry.ENDER_WRAPPING_PAPER;
+                MenuRegistry.openExtendedMenu(sp,
+                        getContainer(isEnder),
+                        buf -> buf.writeBoolean(isEnder)
+                );
+            }
             if (!user.getAbilities().instabuild) {
                 itemStack.shrink(1);
             }
@@ -32,6 +40,10 @@ public class WrappingPaperItem extends NormalItem {
     }
 
     public static MenuProvider getContainer(boolean isEnder) {
-        return new SimpleMenuProvider((id, inventory, player) -> new WrappingPaperScreenHandler(id, inventory, isEnder), CONTAINER_NAME);
+        return new SimpleMenuProvider(
+                (id, inventory, player) -> new WrappingPaperScreenHandler(id, inventory, isEnder),
+                CONTAINER_NAME
+        );
     }
+
 }

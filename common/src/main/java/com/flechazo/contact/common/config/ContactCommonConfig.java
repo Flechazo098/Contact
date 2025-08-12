@@ -14,7 +14,6 @@ import java.util.List;
 public class ContactCommonConfig extends AutoInitConfigContainer {
     public static final ContactCommonConfig INSTANCE = new ContactCommonConfig();
 
-    // 违禁品配置（通用 - 需要客户端和服务器同步）
     public final IConfigEntry<List<String>> blacklistID = new ListStringEntry("config.contact.common.contraband.blacklistID",
             Lists.newArrayList("contact:parcel", "contact:letter", "minecraft:shulker_box", "minecraft:bundle",
                     "minecraft:white_shulker_box", "minecraft:orange_shulker_box", "minecraft:magenta_shulker_box", "minecraft:light_blue_shulker_box",
@@ -23,7 +22,6 @@ public class ContactCommonConfig extends AutoInitConfigContainer {
                     "minecraft:brown_shulker_box", "minecraft:green_shulker_box", "minecraft:red_shulker_box", "minecraft:black_shulker_box"))
             .json("blacklistID");
 
-    // 邮件系统配置（通用 - 游戏逻辑相关）
     public final IConfigEntry<Integer> postalSpeed = new IntegerEntry("config.contact.common.mail.postalSpeed", 4, 0, 1200)
             .json("postalSpeed");
 
@@ -39,18 +37,15 @@ public class ContactCommonConfig extends AutoInitConfigContainer {
 
     @Override
     public void init() {
-        // 违禁品配置分类
         this.createTab("contraband", "config.contact.common.category.contraband")
                 .add(this.blacklistID);
 
-        // 邮件系统配置分类
         this.createTab("mail", "config.contact.common.category.mail")
                 .add(this.postalSpeed)
                 .add(this.ticksToAnotherWorld)
                 .add(this.enableCenterMailbox);
     }
 
-    // 兼容性方法
     public static List<String> getBlacklistID() {
         return INSTANCE.blacklistID.getValue();
     }
