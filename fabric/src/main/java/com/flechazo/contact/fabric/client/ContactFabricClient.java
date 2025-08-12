@@ -24,7 +24,9 @@ public final class ContactFabricClient implements ClientModInitializer, ModelLoa
     @Override
     public void onInitializeClient() {
         ConfigManager.getInstance().registerConfigHandler(ContactClientConfig.INSTANCE);
-        ScreenHandlerTypeRegistry.clientInit();
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+            ScreenHandlerTypeRegistry.registerContainers();
+        });
         BlockEntityRenderers.register(BlockEntityTypeRegistry.MAILBOX_BLOCK_ENTITY.get(), MailboxTileEntityRenderer::new);
         ClientProxy.bindEntityRenderer();
         BlockColorsRegistry.init();

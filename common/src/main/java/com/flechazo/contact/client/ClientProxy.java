@@ -4,14 +4,11 @@ import com.flechazo.contact.client.gui.screen.NewMailToast;
 import com.flechazo.contact.client.gui.screen.PostcardEditScreen;
 import com.flechazo.contact.client.gui.screen.PostcardReadScreen;
 import com.flechazo.contact.client.renderer.PostcardEntityRenderer;
-import com.flechazo.contact.common.block.BlockRegistry;
 import com.flechazo.contact.common.config.ContactClientConfig;
 import com.flechazo.contact.common.entity.EntityTypeRegistry;
-import com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry;
 import com.flechazo.contact.platform.PlatformHelper;
 import com.flechazo.contact.resourse.PostcardStyle;
 import com.google.common.collect.Maps;
-import com.iafenvoy.jupiter.ConfigManager;
 import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -43,13 +40,6 @@ public class ClientProxy {
         if (ContactClientConfig.isShowNewMailToast()) {
             client.execute(() -> client.getToasts().addToast(new NewMailToast()));
         }
-    }
-
-        public static void onInitializeClient() {
-        ConfigManager.getInstance().registerConfigHandler(ContactClientConfig.INSTANCE);
-        ScreenHandlerTypeRegistry.clientInit();
-        ClientProxy.bindEntityRenderer();
-        BlockRegistry.registerRenderLayer();
     }
 
     public static void registerCutoutRenderLayer(Supplier<Block> block) {

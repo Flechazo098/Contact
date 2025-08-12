@@ -1,6 +1,7 @@
 package com.flechazo.contact.forge;
 
 import com.flechazo.contact.Contact;
+import com.flechazo.contact.ContactClient;
 import com.flechazo.contact.client.ClientProxy;
 import com.flechazo.contact.client.color.block.MailboxBlockColor;
 import com.flechazo.contact.client.color.item.MailboxItemColor;
@@ -46,7 +47,7 @@ public class ContactForgeClient {
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             BlockEntityRenderers.register(BlockEntityTypeRegistry.MAILBOX_BLOCK_ENTITY.get(), MailboxTileEntityRenderer::new);
-            ClientProxy.onInitializeClient();
+            ContactClient.onInitializeClient();
         });
     }
 

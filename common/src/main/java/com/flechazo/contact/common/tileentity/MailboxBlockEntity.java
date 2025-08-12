@@ -69,6 +69,7 @@ public class MailboxBlockEntity extends BlockEntity {
             }
         }
     }
+
     public static void tick(Level level, BlockPos pos, BlockState state, MailboxBlockEntity blockEntity) {
         if (!level.isClientSide) {
             if (blockEntity.refreshTicks >= 0) {

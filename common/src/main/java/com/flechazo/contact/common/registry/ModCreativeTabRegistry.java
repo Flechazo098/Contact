@@ -51,8 +51,4 @@ public final class ModCreativeTabRegistry {
                             })
             )
     );
-
-    public static void initialize() {
-        CREATIVE_TABS.register();
-    }
 }

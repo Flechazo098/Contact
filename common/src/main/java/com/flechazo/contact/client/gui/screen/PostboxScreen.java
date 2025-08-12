@@ -23,8 +23,6 @@ import net.minecraft.world.entity.player.Inventory;
 import java.util.List;
 import java.util.Objects;
 
-import static com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry.RED_POSTBOX_CONTAINER;
-
 public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler> {
     private static final ResourceLocation RED_TEXTURE = new ResourceLocation(Contact.MOD_ID, "textures/gui/red_postbox.png");
     private static final ResourceLocation GREEN_TEXTURE = new ResourceLocation(Contact.MOD_ID, "textures/gui/green_postbox.png");
@@ -37,7 +35,7 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
 
     public PostboxScreen(PostboxScreenHandler screenContainer, Inventory inv, Component titleIn) {
         super(screenContainer, inv, titleIn);
-        this.isRed = screenContainer.getType() == RED_POSTBOX_CONTAINER;
+        this.isRed = screenContainer.isRed();
     }
 
     @Override
@@ -141,6 +139,7 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
 
             int z = 5000;
             if (size != 0) {
+                System.out.println(isRed);
                 ResourceLocation texture = isRed ? RED_TEXTURE : GREEN_TEXTURE;
 //                RenderSystem.setShaderTexture(0, texture);
                 int renderWidth = maxWidth;

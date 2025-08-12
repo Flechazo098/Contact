@@ -9,11 +9,11 @@ public class MailboxDataManager {
     public static IMailboxDataProvider getData(MinecraftServer server) {
         return PlatformHelper.getMailboxDataProvider(server);
     }
-    
+
     public static IMailboxDataProvider getData(Level level) {
         return getData(level.getServer());
     }
-    
+
     public static IMailboxDataProvider getData(ServerPlayer player) {
         return getData(player.getServer());
     }

@@ -16,7 +16,7 @@ public final class ContactForge {
     public ContactForge() {
         EventBuses.registerModEventBus(Contact.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
         DataRegistry.register(PostcardStyle.class);
-        Contact.initForge();
+        Contact.init();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
     }
 

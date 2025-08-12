@@ -9,14 +9,10 @@ import com.flechazo.contact.common.handler.MailboxManager;
 import com.flechazo.contact.common.handler.WanderingTraderSaleHandler;
 import com.flechazo.contact.common.item.ItemRegistry;
 import com.flechazo.contact.common.registry.ModCreativeTabRegistry;
-import com.flechazo.contact.common.registry.RegistryManager;
 import com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry;
 import com.flechazo.contact.common.tileentity.BlockEntityTypeRegistry;
-import com.flechazo.contact.network.*;
-import com.flechazo.contact.resourse.PostcardDataManager;
 import com.iafenvoy.jupiter.ConfigManager;
 import com.iafenvoy.jupiter.ServerConfigManager;
-import com.mafuyu404.oelib.api.net.NetworkManager;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.InteractionEvent;
 import dev.architectury.event.events.common.PlayerEvent;
@@ -53,23 +49,16 @@ public final class Contact {
         return new ResourceLocation(MOD_ID, id);
     }
 
-    public static void initFabric() {
-        CommandRegistrationEvent.EVENT.register(ContactCommand::register);
-        TickEvent.SERVER_PRE.register(MailboxManager::onServerTick);
-        InteractionEvent.INTERACT_ENTITY.register(WanderingTraderSaleHandler::interact);
-        PlayerEvent.PLAYER_JOIN.register(AddresseeSignInHandler::onPlayerLoggedIn);
-    }
-    public static void initForge() {
+    public static void init() {
         ConfigManager.getInstance().registerConfigHandler(ContactCommonConfig.INSTANCE);
         ConfigManager.getInstance().registerServerConfig(ContactCommonConfig.INSTANCE, ServerConfigManager.PermissionChecker.IS_OPERATOR);
-        RegistryManager.initialize();
-        BlockRegistry.initBlocks();
-        ItemRegistry.initItems();
-        EntityTypeRegistry.init();
-        ScreenHandlerTypeRegistry.init();
-        BlockEntityTypeRegistry.init();
-        PostcardDataManager.initialize();
-        ModCreativeTabRegistry.initialize();
+
+        BlockRegistry.BLOCKS.register();
+        BlockEntityTypeRegistry.BLOCK_ENTITY_TYPES.register();
+        EntityTypeRegistry.ENTITY_TYPES.register();
+        ModCreativeTabRegistry.CREATIVE_TABS.register();
+        ItemRegistry.ITEMS.register();
+        ScreenHandlerTypeRegistry.MENU_TYPES.register();
         CommandRegistrationEvent.EVENT.register(ContactCommand::register);
         TickEvent.SERVER_PRE.register(MailboxManager::onServerTick);
         InteractionEvent.INTERACT_ENTITY.register(WanderingTraderSaleHandler::interact);

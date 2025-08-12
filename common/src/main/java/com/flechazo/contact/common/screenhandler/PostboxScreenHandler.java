@@ -23,9 +23,11 @@ public class PostboxScreenHandler extends ContentScreenHandler {
     public String playerName = "";
     public List<String> names = Lists.newArrayList();
     public List<Integer> ticks = Lists.newArrayList();
+    private final boolean isRed;
 
     public PostboxScreenHandler(int id, Inventory inv, boolean isRed) {
         super(isRed ? RED_POSTBOX_CONTAINER.get() : GREEN_POSTBOX_CONTAINER.get(), id);
+        this.isRed = isRed;
         parcel.addListener(inventory ->
         {
             if (parcel.getItem(0).getItem() instanceof IMailItem) {
@@ -89,5 +91,9 @@ public class PostboxScreenHandler extends ContentScreenHandler {
     @Override
     public int getContainerCount() {
         return 1;
+    }
+
+    public boolean isRed() {
+        return this.isRed;
     }
 }

@@ -14,21 +14,32 @@ import java.util.UUID;
 
 public interface IMailboxDataProvider {
     Map<String, UUID> getNameToUUID();
+
     Map<UUID, SimpleContainer> getUuidToContents();
+
     List<MailToBeSent> getMailList();
-    
+
     SimpleContainer getMailboxContents(UUID uuid);
+
     boolean isMailboxEmpty(UUID uuid);
+
     boolean isMailboxFull(UUID uuid);
+
     boolean addMailboxContents(UUID uuid, ItemStack parcelIn);
+
     void setMailboxContents(UUID uuid, SimpleContainer contents);
+
     void resetMailboxContents(UUID uuid);
-    
+
     @Nullable
     UUID getMailboxOwner(ResourceKey<Level> level, BlockPos pos);
+
     @Nullable
     GlobalPos getMailboxPos(UUID uuid);
+
     void setMailboxData(UUID uuid, ResourceKey<Level> level, BlockPos pos);
+
     void removeMailboxData(GlobalPos pos);
+
     PlayerMailboxData data();
 }
