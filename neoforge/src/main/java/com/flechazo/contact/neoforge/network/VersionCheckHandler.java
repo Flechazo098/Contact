@@ -1,4 +1,4 @@
-package com.flechazo.contact.forge.network;
+package com.flechazo.contact.neoforge.network;
 
 import com.flechazo.contact.Contact;
 import net.minecraft.network.FriendlyByteBuf;

@@ -1,7 +1,7 @@
-package com.flechazo.contact.forge;
+package com.flechazo.contact.neoforge;
 
 import com.flechazo.contact.Contact;
-import com.flechazo.contact.forge.network.VersionCheckHandler;
+import com.flechazo.contact.neoforge.network.VersionCheckHandler;
 import com.flechazo.contact.network.*;
 import com.flechazo.contact.resourse.PostcardStyle;
 import com.mafuyu404.oelib.api.net.NetworkManager;

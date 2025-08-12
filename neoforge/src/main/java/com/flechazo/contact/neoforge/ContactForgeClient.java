@@ -1,8 +1,7 @@
-package com.flechazo.contact.forge;
+package com.flechazo.contact.neoforge;
 
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.ContactClient;
-import com.flechazo.contact.client.ClientProxy;
 import com.flechazo.contact.client.color.block.MailboxBlockColor;
 import com.flechazo.contact.client.color.item.MailboxItemColor;
 import com.flechazo.contact.client.gui.tooltip.PackageTooltipComponent;

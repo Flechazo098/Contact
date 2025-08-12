@@ -1,4 +1,4 @@
-package com.flechazo.contact.forge.storage;
+package com.flechazo.contact.neoforge.storage;
 
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.common.storage.PlayerMailboxData;

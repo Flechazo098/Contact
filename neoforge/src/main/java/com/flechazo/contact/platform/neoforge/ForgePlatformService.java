@@ -1,8 +1,8 @@
-package com.flechazo.contact.platform.forge;
+package com.flechazo.contact.platform.neoforge;
 
 import com.flechazo.contact.common.storage.IMailboxDataProvider;
-import com.flechazo.contact.forge.storage.ForgeMailboxDataProvider;
-import com.flechazo.contact.forge.storage.MailboxDataCapability;
+import com.flechazo.contact.neoforge.storage.ForgeMailboxDataProvider;
+import com.flechazo.contact.neoforge.storage.MailboxDataCapability;
 import com.flechazo.contact.platform.IDataManagerWrapper;
 import com.flechazo.contact.platform.IPlatformService;
 import com.mafuyu404.oelib.forge.data.DataManager;

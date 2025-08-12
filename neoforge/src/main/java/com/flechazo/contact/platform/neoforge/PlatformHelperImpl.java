@@ -1,4 +1,4 @@
-package com.flechazo.contact.platform.forge;
+package com.flechazo.contact.platform.neoforge;
 
 import com.flechazo.contact.platform.IPlatformService;
 
