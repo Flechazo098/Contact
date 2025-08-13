@@ -31,7 +31,7 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
     modImplementation "curse.maven:jupiter-1072905:6843051"
-    modImplementation(files("../libs/OELib-fabric-0.0.4-beta.jar"))
+    modImplementation "curse.maven:oelib-1319210:6882793"
     modImplementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }

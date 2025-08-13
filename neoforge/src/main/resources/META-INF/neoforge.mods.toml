@@ -1,17 +1,16 @@
 modLoader = "javafml"
 loaderVersion = "[1,)"
 #issueTrackerURL = ""
-license = "MIT"
+license = "BSD-3"
 
 [[mods]]
 modId = "contact"
 version = "${version}"
 displayName = "Contact"
-authors = ""
-description = '''
+authors = "Flechazo, RoshioLeo, Gloridifice, MalayP"
+description = 'A mod that provides postal service'
 
-'''
-#logoFile = ""
+logoFile = "assets/contact/logo.png"
 
 [[dependencies.contact]]
 modId = "neoforge"
@@ -33,3 +32,18 @@ mandatory = true
 versionRange = "[9.2.14,)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies.contact]]
+modId = "oelib"
+mandatory = true
+versionRange = "[0.0.4-beta,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.contact]]
+modId = "jupiter"
+mandatory = true
+versionRange = "[2.0)"
+ordering = "NONE"
+side = "BOTH"
+
