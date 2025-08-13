@@ -13,7 +13,7 @@ public class ContactClientConfig extends FileConfigContainer {
             .json("showNewMailToast");
 
     public ContactClientConfig() {
-        super(new ResourceLocation(Contact.MOD_ID, "contact_client_config"), "config.contact.client.title", "./config/contact/contact-client.json");
+        super(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "contact_client_config"), "config.contact.client.title", "./config/contact/contact-client.json");
     }
 
     @Override

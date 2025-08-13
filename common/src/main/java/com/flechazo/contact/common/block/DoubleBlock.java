@@ -75,13 +75,14 @@ public abstract class DoubleBlock extends Block {
     }
 
     @Override
-    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide) {
             if (player.isCreative()) {
                 removeBottomHalf(level, pos, state, player);
             }
         }
         super.playerWillDestroy(level, pos, state, player);
+        return state;
     }
 
     @Nullable

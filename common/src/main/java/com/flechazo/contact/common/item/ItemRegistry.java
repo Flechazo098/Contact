@@ -2,7 +2,7 @@ package com.flechazo.contact.common.item;
 
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.common.inter.ISilveroakEntry;
-import com.flechazo.contact.resourse.PostcardDataManager;
+import com.flechazo.contact.data.PostcardDataManager;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.registries.Registries;

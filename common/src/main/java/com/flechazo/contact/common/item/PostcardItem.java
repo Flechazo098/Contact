@@ -2,6 +2,7 @@ package com.flechazo.contact.common.item;
 
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.client.ClientProxy;
+import com.flechazo.contact.common.component.ContactDataComponents;
 import com.flechazo.contact.common.entity.PostcardEntity;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -29,7 +30,7 @@ public class PostcardItem extends NormalItem implements IMailItem {
     private final boolean isEnderType;
 
     public PostcardItem(String id, boolean isEnderType) {
-        super(new ResourceLocation(Contact.MOD_ID, id),
+        super(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, id),
                 new Properties().stacksTo(1),
                 null);
         this.isEnderType = isEnderType;
@@ -39,7 +40,7 @@ public class PostcardItem extends NormalItem implements IMailItem {
     public InteractionResultHolder<ItemStack> use(Level level, Player user, InteractionHand hand) {
         ItemStack itemstack = user.getItemInHand(hand);
         if (level.isClientSide) {
-            if (itemstack.getOrCreateTag().contains("Sender")) {
+            if (itemstack.has(ContactDataComponents.POSTCARD_SENDER.get())) {
                 ClientProxy.openPostcardToRead(itemstack);
             } else {
                 ClientProxy.openPostcardToEdit(itemstack, user, hand);
@@ -48,7 +49,6 @@ public class PostcardItem extends NormalItem implements IMailItem {
         user.awardStat(Stats.ITEM_USED.get(this));
         return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide);
     }
-
     @Override
     public InteractionResult useOn(UseOnContext context) {
         BlockPos blockPos = context.getClickedPos();
@@ -84,17 +84,13 @@ public class PostcardItem extends NormalItem implements IMailItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        if (stack.getOrCreateTag().contains("Info")) {
-            MutableComponent background = Component.translatable("tooltip.contact.postcard." + stack.getOrCreateTag().getCompound("Info").getString("ID")).withStyle(ChatFormatting.GRAY);
+    public void appendHoverText(ItemStack stack, TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag flag) {
+        ResourceLocation styleId = stack.get(ContactDataComponents.POSTCARD_STYLE_ID.get());
+        if (styleId != null) {
+            MutableComponent background = Component.translatable("tooltip.postcard." + styleId.getNamespace() + "." + styleId.getPath()).withStyle(ChatFormatting.GRAY);
             tooltip.add(Component.translatable("tooltip.contact.postcard.background", background).withStyle(ChatFormatting.GRAY));
         }
-        if (stack.getOrCreateTag().contains("CardID")) {
-            ResourceLocation id = new ResourceLocation(stack.getOrCreateTag().getString("CardID"));
-            MutableComponent background = Component.translatable("tooltip.postcard." + id.getNamespace() + "." + id.getPath()).withStyle(ChatFormatting.GRAY);
-            tooltip.add(Component.translatable("tooltip.contact.postcard.background", background).withStyle(ChatFormatting.GRAY));
-        }
-        this.addSenderInfoTooltip(stack, level, tooltip, flag);
+        this.addSenderInfoTooltip(stack, tooltipContext, tooltip, flag);
     }
 
     @Override
@@ -102,23 +98,19 @@ public class PostcardItem extends NormalItem implements IMailItem {
         return isEnderType;
     }
 
+
     public static ItemStack getPostcard(ResourceLocation id, boolean isEnderType) {
         ItemStack postcard = new ItemStack(isEnderType ? ItemRegistry.ENDER_POSTCARD.get() : ItemRegistry.POSTCARD.get());
-        CompoundTag nbt = new CompoundTag();
-        nbt.putString("CardID", id.toString());
-        postcard.setTag(nbt);
+        postcard.set(ContactDataComponents.POSTCARD_STYLE_ID.get(), id);
         return postcard;
     }
 
     public static ItemStack setText(ItemStack postcard, String text) {
-        postcard.addTagElement("Text", StringTag.valueOf(text));
+        postcard.set(ContactDataComponents.POSTCARD_TEXT.get(), text);
         return postcard;
     }
 
     public static String getText(ItemStack postcard) {
-        if (postcard.hasTag()) {
-            return postcard.getOrCreateTag().getString("Text");
-        }
-        return "";
+        return postcard.getOrDefault(ContactDataComponents.POSTCARD_TEXT.get(), "");
     }
 }

@@ -17,6 +17,7 @@ public final class EntityTypeRegistry {
         EntityType.Builder<PostcardEntity> builder = EntityType.Builder.of(PostcardEntity::new, MobCategory.MISC);
         builder.sized(0.5f, 0.5f)
                 .clientTrackingRange(10)
+                .eyeHeight(0.0F)
                 .updateInterval(Integer.MAX_VALUE);
         return builder.build("postcard");
     });

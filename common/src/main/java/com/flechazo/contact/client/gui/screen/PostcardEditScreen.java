@@ -3,13 +3,13 @@ package com.flechazo.contact.client.gui.screen;
 import com.flechazo.contact.client.gui.hud.TexturePos;
 import com.flechazo.contact.client.widget.EditableTextBox;
 import com.flechazo.contact.helper.GuiHelper;
-import com.flechazo.contact.resourse.PostcardStyle;
+import com.flechazo.contact.data.PostcardStyle;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -29,14 +29,8 @@ public class PostcardEditScreen extends Screen {
         this.postcard = postcardIn;
         this.editingPlayer = playerIn;
         this.hand = handIn;
-        CompoundTag tag = postcardIn.getTag();
-        if (tag != null) {
-            if (tag.contains("Info")) {
-                style = PostcardStyle.fromNBT(tag);
-            } else if (tag.contains("CardID")) {
-                style = PostcardStyle.fromNBT(tag);
-            } else style = PostcardStyle.DEFAULT;
-        } else style = PostcardStyle.DEFAULT;
+
+        this.style = PostcardStyle.fromItemStack(postcardIn);
         this.textBox = this.addRenderableOnly(new EditableTextBox(postcard, editingPlayer, hand,
                 (this.width - style.cardWidth()) / 2 + style.textPosX(), (this.height - style.cardHeight() - 30) / 2 + style.textPosY(), style.textWidth(), style.textHeight(),
                 12, style.textColor(), Component.literal("Postcard")));
@@ -83,7 +77,7 @@ public class PostcardEditScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        this.renderBackground(guiGraphics);
+        this.renderMenuBackground(guiGraphics);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
@@ -92,7 +86,8 @@ public class PostcardEditScreen extends Screen {
                 new TexturePos(0, 0, style.cardWidth(), style.cardHeight()), style.cardWidth(), style.cardHeight());
 
         textBox.render(guiGraphics, mouseX, mouseY, delta);
-
-        super.render(guiGraphics, mouseX, mouseY, delta);
+        for (Renderable renderable : this.renderables) {
+            renderable.render(guiGraphics, mouseX, mouseY, delta);
+        }
     }
 }

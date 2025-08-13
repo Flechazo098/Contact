@@ -1,6 +1,7 @@
 package com.flechazo.contact.common.block;
 
 import com.flechazo.contact.Contact;
+import com.flechazo.contact.common.component.ContactDataComponents;
 import com.flechazo.contact.common.handler.AdvancementManager;
 import com.flechazo.contact.common.handler.MailboxManager;
 import com.flechazo.contact.common.inter.ISilveroakEntry;
@@ -11,6 +12,8 @@ import com.flechazo.contact.common.storage.MailboxDataManager;
 import com.flechazo.contact.common.tileentity.MailboxBlockEntity;
 import com.flechazo.contact.helper.VoxelShapeHelper;
 import com.flechazo.contact.platform.PlatformHelper;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
@@ -19,16 +22,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -48,6 +49,14 @@ import java.util.UUID;
 import static com.flechazo.contact.common.tileentity.BlockEntityTypeRegistry.MAILBOX_BLOCK_ENTITY;
 
 public class MailboxBlock extends DoubleHorizontalBlock implements EntityBlock, ISilveroakEntry {
+
+    public static final MapCodec<MailboxBlock> CODEC = RecordCodecBuilder.mapCodec(instance ->
+            instance.group(
+                    DyeColor.CODEC.fieldOf("box_color").forGetter(block -> block.boxColor),
+                    DyeColor.CODEC.optionalFieldOf("flag_color", DyeColor.RED).forGetter(block -> block.flagColor)
+            ).apply(instance, MailboxBlock::new)
+    );
+
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public final DyeColor boxColor;
     public final DyeColor flagColor;
@@ -95,12 +104,12 @@ public class MailboxBlock extends DoubleHorizontalBlock implements EntityBlock, 
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide) {
             IMailboxDataProvider data = MailboxDataManager.getData(level);
             BlockPos topPos = state.getValue(HALF) == DoubleBlockHalf.UPPER ? pos : pos.above();
             UUID mailboxOwner = data.getMailboxOwner(level.dimension(), topPos);
+
             if (player.isShiftKeyDown()) {
                 // 检查邮箱主人，没有的话，录入
                 if (mailboxOwner == null) {
@@ -111,10 +120,11 @@ public class MailboxBlock extends DoubleHorizontalBlock implements EntityBlock, 
                     }
                     data.setMailboxData(player.getUUID(), level.dimension(), topPos);
                     MailboxManager.updateState(level, topPos);
-                    AdvancementManager.givePlayerAdvancement(level.getServer(), (ServerPlayer) player, new ResourceLocation("contact:root"));
+                    AdvancementManager.givePlayerAdvancement(level.getServer(), (ServerPlayer) player, ResourceLocation.parse("contact:root"));
                     return InteractionResult.SUCCESS;
                 }
             }
+
             if (Objects.equals(mailboxOwner, player.getUUID())) {
                 // 获取邮件
                 SimpleContainer contents = data.getMailboxContents(mailboxOwner);
@@ -123,17 +133,15 @@ public class MailboxBlock extends DoubleHorizontalBlock implements EntityBlock, 
                     ItemStack parcel = contents.getItem(i);
                     if (!parcel.isEmpty()) {
                         if (parcel.getItem() instanceof PostcardItem) {
-                            AdvancementManager.givePlayerAdvancement(level.getServer(), (ServerPlayer) player, new ResourceLocation("contact:receive_postcard"));
+                            AdvancementManager.givePlayerAdvancement(level.getServer(), (ServerPlayer) player, ResourceLocation.parse("contact:receive_postcard"));
                         }
-                        if (parcel.getOrCreateTag().contains("AnotherLevel")) {
-                            AdvancementManager.givePlayerAdvancement(level.getServer(), (ServerPlayer) player, new ResourceLocation("contact:from_another_world"));
+                        if (parcel.has(ContactDataComponents.ANOTHER_WORLD.get())) {
+                            AdvancementManager.givePlayerAdvancement(level.getServer(), (ServerPlayer) player, ResourceLocation.parse("contact:from_another_world"));
                         }
-
                         player.getInventory().placeItemBackInInventory(parcel);
                         isEmpty = false;
                     }
                 }
-                // 腾空邮件列表
                 data.resetMailboxContents(mailboxOwner);
                 if (!isEmpty) {
                     player.displayClientMessage(Component.translatable("message.contact.mailbox.pick_up"), true);
@@ -142,38 +150,12 @@ public class MailboxBlock extends DoubleHorizontalBlock implements EntityBlock, 
                 }
                 MailboxManager.updateState(level, topPos);
                 return InteractionResult.SUCCESS;
-            } else if (player.getItemInHand(handIn).getItem() instanceof IMailItem) {
-                if (mailboxOwner != null) {
-                    ItemStack held = player.getItemInHand(handIn).copy();
-                    if (!held.getOrCreateTag().contains("Sender")) {
-                        // 不是主人的话，如果有包裹和明信片，那么塞进去
-                        if (!data.isMailboxFull(mailboxOwner)) {
-                            if (level.getBlockEntity(topPos) instanceof MailboxBlockEntity mailbox && mailbox.checkToSend()) {
-                                held.getOrCreateTag().putString("Sender", player.getName().getString());
-                                data.addMailboxContents(mailboxOwner, held);
-                                player.setItemInHand(handIn, ItemStack.EMPTY);
-                                player.displayClientMessage(Component.translatable("message.contact.mailbox.deliver"), true);
-                                AdvancementManager.givePlayerAdvancement(player.getServer(), (ServerPlayer) player, new ResourceLocation("contact:send_in_person"));
-                                MailboxManager.updateState(level, topPos);
-                            } else {
-                                player.displayClientMessage(Component.translatable("message.contact.mailbox.check"), true);
-                            }
-                        } else {
-                            player.displayClientMessage(Component.translatable("message.contact.mailbox.full"), true);
-                        }
-                    } else {
-                        player.displayClientMessage(Component.translatable("message.contact.mailbox.used"), true);
-                    }
-                    return InteractionResult.SUCCESS;
-                } else {
-                    player.displayClientMessage(Component.translatable("message.contact.mailbox.no_owner"), true);
-                }
-                return InteractionResult.SUCCESS;
             } else if (mailboxOwner != null) {
                 PlatformHelper.getCurrentServer().getProfileCache().get(mailboxOwner).ifPresent(gameProfile ->
                         player.displayClientMessage(Component.translatable("message.contact.mailbox.others", gameProfile.getName()), true));
                 return InteractionResult.SUCCESS;
             }
+
             player.displayClientMessage(Component.translatable("message.contact.mailbox.no_owner_tips"), true);
             return InteractionResult.FAIL;
         }
@@ -181,13 +163,51 @@ public class MailboxBlock extends DoubleHorizontalBlock implements EntityBlock, 
     }
 
     @Override
-    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    protected ItemInteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!level.isClientSide && itemStack.getItem() instanceof IMailItem) {
+            IMailboxDataProvider data = MailboxDataManager.getData(level);
+            BlockPos topPos = state.getValue(HALF) == DoubleBlockHalf.UPPER ? pos : pos.above();
+            UUID mailboxOwner = data.getMailboxOwner(level.dimension(), topPos);
+
+            if (mailboxOwner != null) {
+                ItemStack held = itemStack.copy();
+                if (!held.has(ContactDataComponents.POSTCARD_SENDER.get())) {
+                    if (!data.isMailboxFull(mailboxOwner)) {
+                        if (level.getBlockEntity(topPos) instanceof MailboxBlockEntity mailbox && mailbox.checkToSend()) {
+                            held.set(ContactDataComponents.POSTCARD_SENDER.get(), player.getName().getString());
+                            data.addMailboxContents(mailboxOwner, held);
+                            itemStack.shrink(1);
+                            player.displayClientMessage(Component.translatable("message.contact.mailbox.deliver"), true);
+                            AdvancementManager.givePlayerAdvancement(player.getServer(), (ServerPlayer) player, ResourceLocation.parse("contact:send_in_person"));
+                            MailboxManager.updateState(level, topPos);
+                            return ItemInteractionResult.SUCCESS;
+                        } else {
+                            player.displayClientMessage(Component.translatable("message.contact.mailbox.check"), true);
+                        }
+                    } else {
+                        player.displayClientMessage(Component.translatable("message.contact.mailbox.full"), true);
+                    }
+                } else {
+                    player.displayClientMessage(Component.translatable("message.contact.mailbox.used"), true);
+                }
+                return ItemInteractionResult.SUCCESS;
+            } else {
+                player.displayClientMessage(Component.translatable("message.contact.mailbox.no_owner"), true);
+                return ItemInteractionResult.SUCCESS;
+            }
+        }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    @Override
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         super.playerWillDestroy(level, pos, state, player);
         if (!level.isClientSide) {
             IMailboxDataProvider data = MailboxDataManager.getData(level);
             BlockPos topPos = state.getValue(HALF) == DoubleBlockHalf.UPPER ? pos : pos.above();
             data.removeMailboxData(GlobalPos.of(level.dimension(), topPos));
         }
+        return state;
     }
 
     @Nullable
@@ -221,5 +241,10 @@ public class MailboxBlock extends DoubleHorizontalBlock implements EntityBlock, 
     @Override
     public ResourceLocation getRegistryID() {
         return Contact.getRL(boxColor.getName() + "_mailbox");
+    }
+
+    @Override
+    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
+        return CODEC;
     }
 }

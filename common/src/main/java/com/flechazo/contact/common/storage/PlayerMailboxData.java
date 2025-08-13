@@ -1,15 +1,19 @@
 package com.flechazo.contact.common.storage;
 
 import com.flechazo.contact.common.tileentity.MailboxBlockEntity;
-import com.flechazo.contact.network.ActionMessage;
+import com.flechazo.contact.network.ActionS2CMessage;
 import com.flechazo.contact.platform.PlatformHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,6 +36,48 @@ public class PlayerMailboxData {
     private final Map<GlobalPos, UUID> locationToPlayer = Maps.newHashMap();
 
     public final List<MailToBeSent> mailList = Lists.newArrayList();
+
+
+    public CompoundTag serializeForAttachment(HolderLookup.Provider provider) {
+        CompoundTag tag = new CompoundTag();
+        writeToNBT(tag, provider);
+        return tag;
+    }
+
+    public static PlayerMailboxData deserializeForAttachment(CompoundTag tag, HolderLookup.Provider provider) {
+        PlayerMailboxData data = new PlayerMailboxData();
+        data.readFromNBT(tag, provider);
+        return data;
+    }
+
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, PlayerMailboxData> STREAM_CODEC = StreamCodec.of(
+            (buf, data) -> {
+                CompoundTag tag = new CompoundTag();
+                data.writeToNBT(tag, buf.registryAccess());
+                ByteBufCodecs.COMPOUND_TAG.encode(buf, tag);
+
+                buf.writeInt(data.nameToUUID.size());
+                data.nameToUUID.forEach((name, uuid) -> {
+                    ByteBufCodecs.STRING_UTF8.encode(buf, name);
+                    ByteBufCodecs.STRING_UTF8.encode(buf, uuid.toString());
+                });
+            },
+            (buf) -> {
+                PlayerMailboxData data = new PlayerMailboxData();
+                CompoundTag tag = ByteBufCodecs.COMPOUND_TAG.decode(buf);
+                data.readFromNBT(tag, buf.registryAccess());
+
+                int nameMapSize = buf.readInt();
+                for (int i = 0; i < nameMapSize; i++) {
+                    String name = ByteBufCodecs.STRING_UTF8.decode(buf);
+                    String uuidStr = ByteBufCodecs.STRING_UTF8.decode(buf);
+                    data.nameToUUID.put(name, UUID.fromString(uuidStr));
+                }
+
+                return data;
+            }
+    );
 
     public SimpleContainer getMailboxContents(UUID uuid) {
         return uuidToContents.getOrDefault(uuid, new SimpleContainer(24));
@@ -76,7 +122,7 @@ public class PlayerMailboxData {
                     setMailboxContents(uuid, mailbox);
                     ServerPlayer player = PlatformHelper.getCurrentServer().getPlayerList().getPlayer(uuid);
                     if (player != null) {
-                        ActionMessage packet = ActionMessage.create(0);
+                        ActionS2CMessage packet = ActionS2CMessage.create(0);
                         packet.sendTo(player);
                     }
                     return true;
@@ -142,7 +188,8 @@ public class PlayerMailboxData {
         }
     }
 
-    public CompoundTag writeToNBT(CompoundTag tag) {
+
+    public CompoundTag writeToNBT(CompoundTag tag, HolderLookup.Provider provider) {
         int n = uuidToContents.size();
         tag.putInt("MapDataSize", n);
         int i = 0;
@@ -150,7 +197,7 @@ public class PlayerMailboxData {
             CompoundTag compoundTag = new CompoundTag();
 
             compoundTag.putString("UUID", uuid.toString());
-            compoundTag.put("Contents", uuidToContents.getOrDefault(uuid, new SimpleContainer(24)).createTag());
+            compoundTag.put("Contents", uuidToContents.getOrDefault(uuid, new SimpleContainer(24)).createTag(provider));
 
             GlobalPos globalPos = uuidToLocation.get(uuid);
             if (globalPos != null) {
@@ -165,7 +212,7 @@ public class PlayerMailboxData {
 
         tag.putInt("MailListSize", mailList.size());
         for (i = 0; i < mailList.size(); i++) {
-            tag.put("MailListData" + i, mailList.get(i).writeToNBT());
+            tag.put("MailListData" + i, mailList.get(i).writeToNBT(provider));
         }
 
         tag.putInt("NameMapSize", nameToUUID.size());
@@ -178,8 +225,7 @@ public class PlayerMailboxData {
 
         return tag;
     }
-
-    public void readFromNBT(CompoundTag tag) {
+    public void readFromNBT(CompoundTag tag, HolderLookup.Provider provider) {
         uuidToContents.clear();
         uuidToLocation.clear();
         locationToPlayer.clear();
@@ -191,7 +237,7 @@ public class PlayerMailboxData {
             CompoundTag compoundTag = tag.getCompound("MapData" + i);
             UUID uuid = UUID.fromString(compoundTag.getString("UUID"));
             SimpleContainer contents = new SimpleContainer(24);
-            contents.fromTag(compoundTag.getList("Contents", Tag.TAG_COMPOUND));
+            contents.fromTag(compoundTag.getList("Contents", Tag.TAG_COMPOUND), provider);
             uuidToContents.put(uuid, contents);
 
             if (compoundTag.contains("MailboxDimension")) {
@@ -206,7 +252,7 @@ public class PlayerMailboxData {
         n = tag.getInt("MailListSize");
         for (int i = 0; i < n; i++) {
             CompoundTag compoundTag = tag.getCompound("MailListData" + i);
-            MailToBeSent mail = new MailToBeSent(compoundTag);
+            MailToBeSent mail = new MailToBeSent(compoundTag, provider);
             mailList.add(mail);
         }
 

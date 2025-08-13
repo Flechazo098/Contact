@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler> {
-    private static final ResourceLocation RED_TEXTURE = new ResourceLocation(Contact.MOD_ID, "textures/gui/red_postbox.png");
-    private static final ResourceLocation GREEN_TEXTURE = new ResourceLocation(Contact.MOD_ID, "textures/gui/green_postbox.png");
+    private static final ResourceLocation RED_TEXTURE = ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "textures/gui/red_postbox.png");
+    private static final ResourceLocation GREEN_TEXTURE = ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "textures/gui/green_postbox.png");
     private final boolean isRed;
     private int offsetX;
     private int offsetY;
@@ -94,7 +94,6 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
     @Override
     protected void containerTick() {
         super.containerTick();
-        this.nameField.tick();
         if (menu.status == 1 && !nameField.getValue().equals(menu.playerName)) {
             nameField.setValue(menu.playerName);
         }
@@ -122,7 +121,7 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
 
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
 
@@ -139,7 +138,6 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
 
             int z = 5000;
             if (size != 0) {
-                System.out.println(isRed);
                 ResourceLocation texture = isRed ? RED_TEXTURE : GREEN_TEXTURE;
 //                RenderSystem.setShaderTexture(0, texture);
                 int renderWidth = maxWidth;

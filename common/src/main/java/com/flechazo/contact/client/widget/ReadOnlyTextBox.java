@@ -1,5 +1,6 @@
 package com.flechazo.contact.client.widget;
 
+import com.flechazo.contact.common.component.ContactDataComponents;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -39,13 +40,8 @@ public class ReadOnlyTextBox extends AbstractWidget {
         this.color = color;
         this.spacing = spacingPixel;
 
-        CompoundTag compoundTag = item.getTag();
-        if (compoundTag != null) {
-            Tag tag = compoundTag.get("Text");
-            if (tag != null) {
-                this.page = tag.copy().getAsString();
-            }
-        }
+        String text = item.get(ContactDataComponents.POSTCARD_TEXT.get());
+        this.page = text != null ? text : "";
 
         this.currentPage = this.createPage();
     }
@@ -94,16 +90,11 @@ public class ReadOnlyTextBox extends AbstractWidget {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         for (EditableTextBox.Line line : currentPage.lines) {
             guiGraphics.drawString(this.font, line.lineTextComponent, line.x, line.y, color, false);
         }
-    }
-
-    @Override
-    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-
     }
 
     @Override

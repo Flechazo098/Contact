@@ -1,5 +1,7 @@
 package com.flechazo.contact.network;
 
+import com.flechazo.contact.Contact;
+import com.flechazo.contact.common.component.ContactDataComponents;
 import com.flechazo.contact.common.config.ContactCommonConfig;
 import com.flechazo.contact.common.handler.AdvancementManager;
 import com.flechazo.contact.common.handler.MailboxManager;
@@ -9,12 +11,12 @@ import com.flechazo.contact.common.screenhandler.PostboxScreenHandler;
 import com.flechazo.contact.common.storage.IMailboxDataProvider;
 import com.flechazo.contact.common.storage.MailToBeSent;
 import com.flechazo.contact.common.storage.MailboxDataManager;
-import com.mafuyu404.oelib.api.net.INetworkContext;
-import com.mafuyu404.oelib.api.net.NetworkPacket;
-import com.mafuyu404.oelib.api.net.Side;
-import com.mafuyu404.oelib.api.net.SimplePacket;
+import dev.architectury.networking.NetworkManager;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -22,31 +24,22 @@ import net.minecraft.world.level.Level;
 
 import java.util.*;
 
-@NetworkPacket(side = Side.SERVER)
-public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessage> {
-    private final String nameIn;
-    private final boolean shouldSend;
+public record EnquireAddresseeMessage(String nameIn, boolean shouldSend) implements CustomPacketPayload {
 
-    public EnquireAddresseeMessage(String name, boolean shouldSend) {
-        this.nameIn = name;
-        this.shouldSend = shouldSend;
-    }
+    public static final CustomPacketPayload.Type<EnquireAddresseeMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "enquire_addressee_message"));
 
-    @Override
-    public void encode(FriendlyByteBuf buf) {
-        buf.writeUtf(nameIn, 32767);
-        buf.writeBoolean(shouldSend);
-    }
-
-    public static EnquireAddresseeMessage decode(FriendlyByteBuf buf) {
-        String name = buf.readUtf(32767);
-        boolean shouldSend = buf.readBoolean();
-        return new EnquireAddresseeMessage(name, shouldSend);
-    }
+    public static final StreamCodec<FriendlyByteBuf, EnquireAddresseeMessage> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8, EnquireAddresseeMessage::nameIn,
+            ByteBufCodecs.BOOL, EnquireAddresseeMessage::shouldSend,
+            EnquireAddresseeMessage::new
+    );
 
     @Override
-    protected void handleServer(INetworkContext context) {
-        ServerPlayer player = getSender(context);
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+
+    public void handleServer(ServerPlayer player) {
         if (player == null || nameIn.isEmpty()) {
             return;
         }
@@ -67,13 +60,13 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
         if (shouldSend) {
             if (player.containerMenu instanceof PostboxScreenHandler container) {
                 ItemStack parcel = container.parcel.getItem(0).copy();
-                parcel.getOrCreateTag().putString("Sender", player.getName().getString());
+                parcel.set(ContactDataComponents.POSTCARD_SENDER.get(), player.getName().getString());
 
                 for (UUID uuid : data.getNameToUUID().values()) {
                     data.getMailList().add(new MailToBeSent(uuid, parcel.copy(), 0));
                 }
 
-                ActionMessage.create(1).sendTo(player);
+                ActionS2CMessage.create(1).sendTo(player);
                 container.parcel.setItem(0, ItemStack.EMPTY);
             }
         } else {
@@ -130,8 +123,8 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
         }
 
         if (player.containerMenu instanceof PostboxScreenHandler) {
-            if (shouldSend && !names.isEmpty() && Objects.equals(names.get(0), nameIn) && ticks.get(0) >= 0) {
-                handleSendMail(player, data, names.get(0), ticks.get(0));
+            if (shouldSend && !names.isEmpty() && Objects.equals(names.getFirst(), nameIn) && ticks.getFirst() >= 0) {
+                handleSendMail(player, data, names.getFirst(), ticks.getFirst());
             } else {
                 AddresseeDataMessage.create(names, ticks).sendTo(player);
             }
@@ -141,14 +134,14 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
     private void handleSendMail(ServerPlayer player, IMailboxDataProvider data, String recipientName, int deliveryTicks) {
         PostboxScreenHandler container = (PostboxScreenHandler) player.containerMenu;
         ItemStack parcel = container.parcel.getItem(0);
-        parcel.getOrCreateTag().putString("Sender", player.getName().getString());
+        parcel.set(ContactDataComponents.POSTCARD_SENDER.get(), player.getName().getString());
 
         if (IPackageItem.checkAndPostmarkPostcard(parcel, player.getName().getString()) ||
                 parcel.getItem() instanceof PostcardItem) {
             AdvancementManager.givePlayerAdvancement(
                     player.server,
                     player,
-                    new ResourceLocation("contact:send_postcard")
+                    ResourceLocation.parse("contact:send_postcard")
             );
         }
 
@@ -157,20 +150,25 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
 
         if (mailboxPos != null) {
             if (mailboxPos.dimension() != player.level().dimension()) {
-                parcel.getOrCreateTag().putBoolean("AnotherWorld", true);
+                parcel.set(ContactDataComponents.ANOTHER_WORLD.get(), true);
             }
         } else {
             if (Level.OVERWORLD != player.level().dimension()) {
-                parcel.getOrCreateTag().putBoolean("AnotherWorld", true);
+                parcel.set(ContactDataComponents.ANOTHER_WORLD.get(), true);
             }
         }
 
         data.getMailList().add(new MailToBeSent(uuid, parcel, deliveryTicks));
-        ActionMessage.create(1).sendTo(player);
+        ActionS2CMessage.create(1).sendTo(player);
         container.parcel.setItem(0, ItemStack.EMPTY);
     }
 
     public static EnquireAddresseeMessage create(String name, boolean shouldSend) {
         return new EnquireAddresseeMessage(name, shouldSend);
     }
+
+    public void sendToServer() {
+        NetworkManager.sendToServer(this);
+    }
+
 }

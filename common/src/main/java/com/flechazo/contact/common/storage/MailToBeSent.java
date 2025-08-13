@@ -1,6 +1,6 @@
 package com.flechazo.contact.common.storage;
 
-
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.SimpleContainer;
@@ -13,11 +13,11 @@ public class MailToBeSent {
     private final SimpleContainer contents;
     private long ticks;
 
-    public MailToBeSent(CompoundTag tag) {
+    public MailToBeSent(CompoundTag tag, HolderLookup.Provider provider) {
         uuid = UUID.fromString(tag.getString("MailUUID"));
         ticks = tag.getInt("MailTicks");
         contents = new SimpleContainer(1);
-        contents.fromTag(tag.getList("MailContents", Tag.TAG_COMPOUND));
+        contents.fromTag(tag.getList("MailContents", Tag.TAG_COMPOUND), provider);
     }
 
     public MailToBeSent(UUID uuid, ItemStack contents, long ticks) {
@@ -43,11 +43,11 @@ public class MailToBeSent {
         if (ticks > 0) ticks -= tick;
     }
 
-    public CompoundTag writeToNBT() {
+    public CompoundTag writeToNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();
         nbt.putString("MailUUID", uuid.toString());
         nbt.putLong("MailTicks", ticks);
-        nbt.put("MailContents", contents.createTag());
+        nbt.put("MailContents", contents.createTag(provider));
         return nbt;
     }
 }

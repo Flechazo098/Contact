@@ -5,7 +5,7 @@ import com.flechazo.contact.client.gui.hud.TexturePos;
 import com.flechazo.contact.client.widget.IconButton;
 import com.flechazo.contact.common.screenhandler.WrappingPaperScreenHandler;
 import com.flechazo.contact.helper.GuiHelper;
-import com.flechazo.contact.network.ActionMessage;
+import com.flechazo.contact.network.ActionC2SMessage;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,7 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
 public class WrappingPaperScreen extends AbstractContainerScreen<WrappingPaperScreenHandler> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(Contact.MOD_ID, "textures/gui/wrapping_paper.png");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "textures/gui/wrapping_paper.png");
     private int offsetX;
     private int offsetY;
     private IconButton buttonPack;
@@ -42,7 +42,7 @@ public class WrappingPaperScreen extends AbstractContainerScreen<WrappingPaperSc
     }
 
     private void pack() {
-        ActionMessage packet = ActionMessage.create(0);
+        ActionC2SMessage packet = ActionC2SMessage.create(0);
         packet.sendToServer();
     }
 
@@ -53,7 +53,7 @@ public class WrappingPaperScreen extends AbstractContainerScreen<WrappingPaperSc
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, mouseX, mouseY, delta);
         super.render(guiGraphics, mouseX, mouseY, delta);
         this.renderTooltip(guiGraphics, mouseX, mouseY);
     }
@@ -66,7 +66,7 @@ public class WrappingPaperScreen extends AbstractContainerScreen<WrappingPaperSc
         RenderSystem.setShaderTexture(0, TEXTURE);
         GuiHelper.drawLayer(guiGraphics.pose(), offsetX, offsetY, new TexturePos(0, 0, 176, 133));
 
-        GuiHelper.renderButton(guiGraphics, delta, leftPos, topPos, 0, TEXTURE, buttonPack,
+        GuiHelper.renderButton(guiGraphics, delta, mouseX, mouseY, 0, TEXTURE, buttonPack,
                 new TexturePos(176, 0, 18, 19),
                 new TexturePos(176, 19, 18, 19));
     }

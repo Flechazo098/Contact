@@ -2,6 +2,7 @@ package com.flechazo.contact;
 
 import com.flechazo.contact.common.block.BlockRegistry;
 import com.flechazo.contact.common.command.ContactCommand;
+import com.flechazo.contact.common.component.ContactDataComponents;
 import com.flechazo.contact.common.config.ContactCommonConfig;
 import com.flechazo.contact.common.entity.EntityTypeRegistry;
 import com.flechazo.contact.common.handler.AddresseeSignInHandler;
@@ -11,13 +12,19 @@ import com.flechazo.contact.common.item.ItemRegistry;
 import com.flechazo.contact.common.registry.ModCreativeTabRegistry;
 import com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry;
 import com.flechazo.contact.common.tileentity.BlockEntityTypeRegistry;
+import com.flechazo.contact.network.NetworkHelper;
 import com.iafenvoy.jupiter.ConfigManager;
 import com.iafenvoy.jupiter.ServerConfigManager;
+import com.mafuyu404.oelib.api.net.INetworkManager;
+import com.mafuyu404.oelib.api.net.INetworkPacket;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.InteractionEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.event.events.common.TickEvent;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
@@ -29,7 +36,7 @@ public final class Contact {
     public static final String MOD_ID = "contact";
     public static final String NETWORK_VERSION = "1.0";
 
-    public static final ResourceKey<CreativeModeTab> ITEM_GROUP = ResourceKey.create(Registries.CREATIVE_MODE_TAB, new ResourceLocation(MOD_ID, "tab"));
+    public static final ResourceKey<CreativeModeTab> ITEM_GROUP = ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath(MOD_ID, "tab"));
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -45,19 +52,26 @@ public final class Contact {
         Contact.LOGGER.log(Level.INFO, String.format(format, data));
     }
 
+
+    public static <T extends INetworkPacket<T> & CustomPacketPayload>
+    INetworkManager.PacketRegistration<T> packet(Class<T> clazz, StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
+        return new INetworkManager.PacketRegistration<>(clazz, codec);
+    }
+
     public static ResourceLocation getRL(String id) {
-        return new ResourceLocation(MOD_ID, id);
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, id);
     }
 
     public static void init() {
         ConfigManager.getInstance().registerConfigHandler(ContactCommonConfig.INSTANCE);
         ConfigManager.getInstance().registerServerConfig(ContactCommonConfig.INSTANCE, ServerConfigManager.PermissionChecker.IS_OPERATOR);
-
+        NetworkHelper.initializeServer();
         BlockRegistry.BLOCKS.register();
         BlockEntityTypeRegistry.BLOCK_ENTITY_TYPES.register();
         EntityTypeRegistry.ENTITY_TYPES.register();
         ModCreativeTabRegistry.CREATIVE_TABS.register();
         ItemRegistry.ITEMS.register();
+        ContactDataComponents.DATA_COMPONENTS.register();
         ScreenHandlerTypeRegistry.MENU_TYPES.register();
         CommandRegistrationEvent.EVENT.register(ContactCommand::register);
         TickEvent.SERVER_PRE.register(MailboxManager::onServerTick);

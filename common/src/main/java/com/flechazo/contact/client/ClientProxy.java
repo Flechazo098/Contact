@@ -7,7 +7,7 @@ import com.flechazo.contact.client.renderer.PostcardEntityRenderer;
 import com.flechazo.contact.common.config.ContactClientConfig;
 import com.flechazo.contact.common.entity.EntityTypeRegistry;
 import com.flechazo.contact.platform.PlatformHelper;
-import com.flechazo.contact.resourse.PostcardStyle;
+import com.flechazo.contact.data.PostcardStyle;
 import com.google.common.collect.Maps;
 import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import net.minecraft.client.Minecraft;

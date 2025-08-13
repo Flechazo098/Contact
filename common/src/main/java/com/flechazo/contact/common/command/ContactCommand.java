@@ -1,6 +1,7 @@
 package com.flechazo.contact.common.command;
 
 import com.flechazo.contact.common.command.arguments.PostcardStyleArgument;
+import com.flechazo.contact.common.component.ContactDataComponents;
 import com.flechazo.contact.common.item.ItemRegistry;
 import com.flechazo.contact.common.item.ParcelItem;
 import com.flechazo.contact.common.item.PostcardItem;
@@ -8,7 +9,7 @@ import com.flechazo.contact.common.storage.IMailboxDataProvider;
 import com.flechazo.contact.common.storage.MailToBeSent;
 import com.flechazo.contact.common.storage.MailboxDataManager;
 import com.flechazo.contact.platform.PlatformHelper;
-import com.flechazo.contact.resourse.PostcardDataManager;
+import com.flechazo.contact.data.PostcardDataManager;
 import com.google.common.collect.Sets;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -304,12 +305,12 @@ public class ContactCommand {
         AtomicInteger n = new AtomicInteger(0);
         if (target.equals("@e")) {
             ItemStack postcard = PostcardItem.setText(PostcardItem.getPostcard(id, isEnder), text);
-            postcard.getOrCreateTag().putString("Sender", sender);
+            postcard.set(ContactDataComponents.POSTCARD_SENDER.get(), sender);
             IMailboxDataProvider data = MailboxDataManager.getData(source.getServer());
             data.getNameToUUID().keySet().forEach(name -> deliverToPlayerMailbox(source, name, ticks, n, postcard));
         } else {
             ItemStack postcard = PostcardItem.setText(PostcardItem.getPostcard(id, false), text);
-            postcard.getOrCreateTag().putString("Sender", sender);
+            postcard.set(ContactDataComponents.POSTCARD_SENDER.get(), sender);
 
             deliverToPlayerMailbox(source, target, ticks, n, postcard);
         }
@@ -322,24 +323,23 @@ public class ContactCommand {
         return n.get();
     }
 
-    private static int givePostcard(CommandSourceStack source, ResourceLocation id, Collection<ServerPlayer> targets, String sender, boolean isEnder, String text) {
-        text = text.replace("\\n", "\n");
-        ItemStack postcard;
-        if (sender.isEmpty()) {
-            postcard = PostcardItem.getPostcard(id, isEnder);
-        } else {
-            postcard = PostcardItem.setText(PostcardItem.getPostcard(id, isEnder), text);
-            postcard.getOrCreateTag().putString("Sender", sender);
+    private static int givePostcard(CommandSourceStack source, ResourceLocation postcardId, Collection<ServerPlayer> targets, String sender, boolean isEnderType, String text) {
+        ItemStack postcard = PostcardItem.getPostcard(postcardId, isEnderType);
+        if (!sender.isEmpty()) {
+            postcard.set(ContactDataComponents.POSTCARD_SENDER.get(), sender);
         }
-        giveParcelToPlayers(targets, postcard);
-
-        if (targets.size() == 1) {
-            source.sendSuccess(() -> Component.translatable("commands.give.success.single", 1, new ItemStack(ItemRegistry.POSTCARD.get()).getHoverName(), targets.iterator().next().getDisplayName()), true);
-        } else {
-            source.sendSuccess(() -> Component.translatable("commands.give.success.single", 1, new ItemStack(ItemRegistry.POSTCARD.get()).getHoverName(), targets.size()), true);
+        if (!text.isEmpty()) {
+            postcard.set(ContactDataComponents.POSTCARD_TEXT.get(), text);
         }
 
-        return targets.size();
+        AtomicInteger i = new AtomicInteger();
+        targets.forEach(player -> {
+            player.getInventory().placeItemBackInInventory(postcard.copy());
+            i.getAndIncrement();
+        });
+
+        source.sendSuccess(() -> Component.translatable("commands.contact.postcard.give.success", i.get()), true);
+        return i.get();
     }
 
     private static void giveParcelToPlayers(Collection<ServerPlayer> targets, ItemStack parcel) {
@@ -357,7 +357,7 @@ public class ContactCommand {
                 ItemEntity itementity = serverPlayer.drop(parcel, false);
                 if (itementity != null) {
                     itementity.setNoPickUpDelay();
-                    itementity.setThrower(serverPlayer.getUUID());
+                    itementity.setThrower(serverPlayer);
                 }
             }
         }

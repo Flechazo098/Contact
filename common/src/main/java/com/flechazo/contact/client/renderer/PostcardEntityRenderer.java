@@ -1,10 +1,12 @@
 package com.flechazo.contact.client.renderer;
 
+import com.flechazo.contact.Contact;
 import com.flechazo.contact.client.ClientProxy;
+import com.flechazo.contact.common.component.ContactDataComponents;
 import com.flechazo.contact.common.entity.PostcardEntity;
-import com.flechazo.contact.common.item.PostcardItem;
+import com.flechazo.contact.data.PostcardDataManager;
 import com.flechazo.contact.helper.ColorHelper;
-import com.flechazo.contact.resourse.PostcardStyle;
+import com.flechazo.contact.data.PostcardStyle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -20,6 +22,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -31,8 +34,8 @@ import org.joml.Matrix4f;
 import java.util.List;
 
 public class PostcardEntityRenderer<T extends PostcardEntity> extends EntityRenderer<T> {
-    private static final ModelResourceLocation PIN = new ModelResourceLocation("contact", "postcard_pin", "");
-    private static final ModelResourceLocation POSTCARD = new ModelResourceLocation("contact", "postcard", "");
+    private static final ModelResourceLocation PIN = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "postcard_pin"), "");
+    private static final ModelResourceLocation POSTCARD = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "postcard_pin"), "");
     private final BlockRenderDispatcher blockRenderDispatcher;
     private final List<String> list = Lists.newArrayList();
     private int textHash = 0;
@@ -41,7 +44,6 @@ public class PostcardEntityRenderer<T extends PostcardEntity> extends EntityRend
         super(ctx);
         this.blockRenderDispatcher = ctx.getBlockRenderDispatcher();
     }
-
 
     @Override
     public void render(T entity, float yaw, float tickDelta, PoseStack poseStack, MultiBufferSource multiBufferSource, int light) {
@@ -57,7 +59,10 @@ public class PostcardEntityRenderer<T extends PostcardEntity> extends EntityRend
         boolean bl = entity.isInvisible();
         ItemStack postcard = entity.getPostcard();
         if (!postcard.isEmpty()) {
-            PostcardStyle postcardStyle = PostcardStyle.fromNBT(postcard.getOrCreateTag());
+            PostcardStyle postcardStyle;
+            ResourceLocation styleId = postcard.get(ContactDataComponents.POSTCARD_STYLE_ID.get());
+            postcardStyle = PostcardDataManager.getPostcards().getOrDefault(styleId, PostcardStyle.DEFAULT);
+
             float width = postcardStyle.cardWidth() / 2.0f;
             float height = postcardStyle.cardHeight() / 2.0f;
 
@@ -100,12 +105,14 @@ public class PostcardEntityRenderer<T extends PostcardEntity> extends EntityRend
             float pointY0 = 64.0f - height / 2.0f;
             float pointY1 = 64.0f + height / 2.0f;
 
-            vertexConsumer.vertex(matrix4f, pointX0, pointY1, -0.01f).color(255, 255, 255, 255).uv(0.0f, 1.0f).uv2(light).endVertex();
-            vertexConsumer.vertex(matrix4f, pointX1, pointY1, -0.01f).color(255, 255, 255, 255).uv(1.0f, 1.0f).uv2(light).endVertex();
-            vertexConsumer.vertex(matrix4f, pointX1, pointY0, -0.01f).color(255, 255, 255, 255).uv(1.0f, 0.0f).uv2(light).endVertex();
-            vertexConsumer.vertex(matrix4f, pointX0, pointY0, -0.01f).color(255, 255, 255, 255).uv(0.0f, 0.0f).uv2(light).endVertex();
+            vertexConsumer.addVertex(matrix4f, pointX0, pointY1, -0.01f).setColor(255, 255, 255, 255).setUv(0.0f, 1.0f).setLight(light);
+            vertexConsumer.addVertex(matrix4f, pointX1, pointY1, -0.01f).setColor(255, 255, 255, 255).setUv(1.0f, 1.0f).setLight(light);
+            vertexConsumer.addVertex(matrix4f, pointX1, pointY0, -0.01f).setColor(255, 255, 255, 255).setUv(1.0f, 0.0f).setLight(light);
+            vertexConsumer.addVertex(matrix4f, pointX0, pointY0, -0.01f).setColor(255, 255, 255, 255).setUv(0.0f, 0.0f).setLight(light);
 
-            if (postcard.getOrCreateTag().contains("Sender")) {
+            // 检查是否有发送者信息
+            String sender = postcard.get(ContactDataComponents.POSTCARD_SENDER.get());
+            if (sender != null && !sender.isEmpty()) {
                 float markX0 = pointX0 + postcardStyle.postmarkPosX() / 2.0f;
                 float markY0 = pointY0 + postcardStyle.postmarkPosY() / 2.0f;
 
@@ -119,14 +126,15 @@ public class PostcardEntityRenderer<T extends PostcardEntity> extends EntityRend
                 int blue = ColorHelper.getBlue(postcardStyle.postmarkColor());
                 int alpha = ColorHelper.getAlpha(postcardStyle.postmarkColor());
 
-                vertex.vertex(matrix4f, markX0, markY0 + markHeight, -0.02f).color(red, green, blue, alpha).uv(0.0f, 1.0f).uv2(light).endVertex();
-                vertex.vertex(matrix4f, markX0 + markWidth, markY0 + markHeight, -0.02f).color(red, green, blue, alpha).uv(1.0f, 1.0f).uv2(light).endVertex();
-                vertex.vertex(matrix4f, markX0 + markWidth, markY0, -0.02f).color(red, green, blue, alpha).uv(1.0f, 0.0f).uv2(light).endVertex();
-                vertex.vertex(matrix4f, markX0, markY0, -0.02f).color(red, green, blue, alpha).uv(0.0f, 0.0f).uv2(light).endVertex();
+                vertex.addVertex(matrix4f, markX0, markY0 + markHeight, -0.02f).setColor(red, green, blue, alpha).setUv(0.0f, 1.0f).setLight(light);
+                vertex.addVertex(matrix4f, markX0 + markWidth, markY0 + markHeight, -0.02f).setColor(red, green, blue, alpha).setUv(1.0f, 1.0f).setLight(light);
+                vertex.addVertex(matrix4f, markX0 + markWidth, markY0, -0.02f).setColor(red, green, blue, alpha).setUv(1.0f, 0.0f).setLight(light);
+                vertex.addVertex(matrix4f, markX0, markY0, -0.02f).setColor(red, green, blue, alpha).setUv(0.0f, 0.0f).setLight(light);
             }
 
-            String text = PostcardItem.getText(postcard);
-            if (!text.isBlank()) {
+            // 获取明信片文本
+            String text = postcard.get(ContactDataComponents.POSTCARD_TEXT.get());
+            if (text != null && !text.isBlank()) {
                 Font font = Minecraft.getInstance().font;
 
                 float textX0 = pointX0 + postcardStyle.textPosX() / 2.0f;
@@ -169,7 +177,7 @@ public class PostcardEntityRenderer<T extends PostcardEntity> extends EntityRend
 
     @Override
     protected boolean shouldShowName(T entity) {
-        if (!Minecraft.renderNames() || entity.getPostcard().isEmpty() || !entity.getPostcard().hasCustomHoverName() || this.entityRenderDispatcher.crosshairPickEntity != entity) {
+        if (!Minecraft.renderNames() || entity.getPostcard().isEmpty() || !entity.getPostcard().has(DataComponents.CUSTOM_NAME) || this.entityRenderDispatcher.crosshairPickEntity != entity) {
             return false;
         }
         double d = this.entityRenderDispatcher.distanceToSqr(entity);

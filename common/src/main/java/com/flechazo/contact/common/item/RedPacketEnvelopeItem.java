@@ -17,7 +17,7 @@ public class RedPacketEnvelopeItem extends NormalItem {
     private static final Component CONTAINER_NAME = Component.translatable("container.contact.red_packet_envelope");
 
     public RedPacketEnvelopeItem() {
-        super(new ResourceLocation(Contact.MOD_ID, "red_packet_envelope"), Contact.ITEM_GROUP);
+        super(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "red_packet_envelope"), Contact.ITEM_GROUP);
     }
 
     @Override

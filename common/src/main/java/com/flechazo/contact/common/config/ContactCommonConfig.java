@@ -32,7 +32,7 @@ public class ContactCommonConfig extends AutoInitConfigContainer {
             .json("enableCenterMailbox");
 
     public ContactCommonConfig() {
-        super(new ResourceLocation(Contact.MOD_ID, "contact_common_config"), "config.contact.common.title", "./config/contact/contact-common.json");
+        super(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "contact_common_config"), "config.contact.common.title", "./config/contact/contact-common.json");
     }
 
     @Override

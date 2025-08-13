@@ -2,7 +2,9 @@ package com.flechazo.contact.common.item;
 
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.client.item.PackageTooltipData;
+import com.flechazo.contact.common.component.ContactDataComponents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -12,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,7 +23,7 @@ import java.util.Optional;
 
 public class RedPacketItem extends NormalItem implements IMailItem, IPackageItem {
     public RedPacketItem() {
-        super(new ResourceLocation(Contact.MOD_ID, "red_packet"),
+        super(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "red_packet"),
                 new Properties().stacksTo(1),
                 Contact.ITEM_GROUP);
     }
@@ -38,14 +41,13 @@ public class RedPacketItem extends NormalItem implements IMailItem, IPackageItem
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        if (stack.getOrCreateTag().contains("blessing")) {
-            tooltip.add(Component.translatable("tooltip.contact.red_packet.blessing",
-                    stack.getOrCreateTag().getString("blessing")).withStyle(ChatFormatting.GRAY));
+    public void appendHoverText(ItemStack stack, @Nullable TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag flag) {
+        String blessing = stack.get(ContactDataComponents.TEXT_BOX_CONTENT.get());
+        if (blessing != null && !blessing.isEmpty()) {
+            tooltip.add(Component.translatable("tooltip.contact.red_packet.blessing", blessing).withStyle(ChatFormatting.GRAY));
         }
-        this.addSenderInfoTooltip(stack, level, tooltip, flag);
+        this.addSenderInfoTooltip(stack, tooltipContext, tooltip, flag);
     }
-
     @Override
     public boolean isEnderType() {
         return false;
@@ -53,10 +55,12 @@ public class RedPacketItem extends NormalItem implements IMailItem, IPackageItem
 
     public static ItemStack getRedPacket(SimpleContainer contents, String blessings, String sender) {
         ItemStack letter = new ItemStack(ItemRegistry.RED_PACKET.get());
-        letter.getOrCreateTag().put("parcel", contents.createTag());
-        letter.getOrCreateTag().putString("blessings", blessings);
+        letter.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(contents.getItems()));
+        if (!blessings.isEmpty()) {
+            letter.set(ContactDataComponents.TEXT_BOX_CONTENT.get(), blessings);
+        }
         if (!sender.isEmpty()) {
-            letter.getOrCreateTag().putString("Sender", sender);
+            letter.set(ContactDataComponents.POSTCARD_SENDER.get(), sender);
         }
         return letter;
     }

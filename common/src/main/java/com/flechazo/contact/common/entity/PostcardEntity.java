@@ -2,6 +2,7 @@ package com.flechazo.contact.common.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -9,6 +10,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -36,6 +38,8 @@ public class PostcardEntity extends HangingEntity {
     private static final EntityDataAccessor<ItemStack> ITEM_STACK = SynchedEntityData.defineId(PostcardEntity.class, EntityDataSerializers.ITEM_STACK);
     private static final EntityDataAccessor<Integer> ROTATION = SynchedEntityData.defineId(PostcardEntity.class, EntityDataSerializers.INT);
     private boolean fixed;
+    private static final double WIDTH = 12.0;
+    private static final double HEIGHT = 12.0;
 
     public PostcardEntity(EntityType<? extends HangingEntity> entityType, Level level) {
         super(entityType, level);
@@ -51,15 +55,9 @@ public class PostcardEntity extends HangingEntity {
     }
 
     @Override
-    protected float getEyeHeight(Pose pose, EntityDimensions dimensions) {
-        return 0.0f;
-    }
-
-
-    @Override
-    protected void defineSynchedData() {
-        this.getEntityData().define(ITEM_STACK, ItemStack.EMPTY);
-        this.getEntityData().define(ROTATION, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(ITEM_STACK, ItemStack.EMPTY);
+        builder.define(ROTATION, 0);
     }
 
     @Override
@@ -78,23 +76,34 @@ public class PostcardEntity extends HangingEntity {
         this.recalculateBoundingBox();
     }
 
+
     @Override
-    protected void recalculateBoundingBox() {
-        double e = (double) this.pos.getX() + 0.5 - (double) this.direction.getStepX() * 0.46875;
-        double f = (double) this.pos.getY() + 0.5 - (double) this.direction.getStepY() * 0.46875;
-        double g = (double) this.pos.getZ() + 0.5 - (double) this.direction.getStepZ() * 0.46875;
-        this.setPos(e, f, g);
-        double h = this.getWidth();
-        double i = this.getHeight();
-        double j = this.getWidth();
-        Direction.Axis axis = this.direction.getAxis();
+    protected AABB calculateBoundingBox(BlockPos blockPos, Direction direction) {
+        double e = (double) blockPos.getX() + 0.5 - (double) direction.getStepX() * 0.46875;
+        double f = (double) blockPos.getY() + 0.5 - (double) direction.getStepY() * 0.46875;
+        double g = (double) blockPos.getZ() + 0.5 - (double) direction.getStepZ() * 0.46875;
+
+        double h = WIDTH;
+        double i = HEIGHT;
+        double j = WIDTH;
+
+        Direction.Axis axis = direction.getAxis();
         switch (axis) {
             case X -> h = 1.0;
             case Y -> i = 1.0;
             case Z -> j = 1.0;
         }
-        this.setBoundingBox(new AABB(e - (h /= 32.0), f - (i /= 32.0), g - (j /= 32.0), e + h, f + i, g + j));
+
+        h /= 32.0;
+        i /= 32.0;
+        j /= 32.0;
+
+        return new AABB(
+                e - h, f - i, g - j,
+                e + h, f + i, g + j
+        );
     }
+
 
     @Override
     public boolean survives() {
@@ -143,16 +152,6 @@ public class PostcardEntity extends HangingEntity {
             return false;
         }
         return super.hurt(source, amount);
-    }
-
-    @Override
-    public int getWidth() {
-        return 12;
-    }
-
-    @Override
-    public int getHeight() {
-        return 12;
     }
 
     @Override
@@ -239,7 +238,8 @@ public class PostcardEntity extends HangingEntity {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         if (!this.getPostcard().isEmpty()) {
-            tag.put("Item", this.getPostcard().save(new CompoundTag()));
+            HolderLookup.Provider provider = this.level().registryAccess();
+            tag.put("Item", this.getPostcard().save(provider));
             tag.putByte("ItemRotation", (byte) this.getRotation());
         }
         tag.putByte("Facing", (byte) this.direction.get3DDataValue());
@@ -252,7 +252,8 @@ public class PostcardEntity extends HangingEntity {
         super.readAdditionalSaveData(tag);
         CompoundTag compoundTag = tag.getCompound("Item");
         if (!compoundTag.isEmpty()) {
-            ItemStack postcard = ItemStack.of(compoundTag);
+            HolderLookup.Provider provider = this.level().registryAccess();
+            ItemStack postcard = ItemStack.parseOptional(provider, compoundTag);
             this.setHeldItemStack(postcard);
             this.setRotation(tag.getByte("ItemRotation"));
         }
@@ -287,7 +288,7 @@ public class PostcardEntity extends HangingEntity {
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity entity) {
         return new ClientboundAddEntityPacket(this, this.direction.get3DDataValue(), this.getPos());
     }
 

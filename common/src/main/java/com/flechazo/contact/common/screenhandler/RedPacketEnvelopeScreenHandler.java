@@ -1,5 +1,6 @@
 package com.flechazo.contact.common.screenhandler;
 
+import com.flechazo.contact.common.component.ContactDataComponents;
 import com.flechazo.contact.common.config.ContactCommonConfig;
 import com.flechazo.contact.common.item.IPackageItem;
 import com.flechazo.contact.common.item.ItemRegistry;
@@ -55,11 +56,10 @@ public class RedPacketEnvelopeScreenHandler extends PackageScreenHandler {
     public ItemStack getPackedItem() {
         ItemStack redPacket = new ItemStack(ItemRegistry.RED_PACKET.get());
         if (!blessings.isBlank()) {
-            redPacket.getOrCreateTag().putString("blessing", blessings);
+            redPacket.set(ContactDataComponents.RED_PACKET_BLESSING.get(), blessings);
         }
         return redPacket;
     }
-
     @Override
     public boolean stillValid(Player player) {
         return true;

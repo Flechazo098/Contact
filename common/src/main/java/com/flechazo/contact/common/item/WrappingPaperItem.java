@@ -18,7 +18,7 @@ public class WrappingPaperItem extends NormalItem {
     private static final Component CONTAINER_NAME = Component.translatable("container.contact.wrapping_paper");
 
     public WrappingPaperItem(String id) {
-        super(new ResourceLocation(Contact.MOD_ID, id), Contact.ITEM_GROUP);
+        super(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, id), Contact.ITEM_GROUP);
     }
 
     @Override

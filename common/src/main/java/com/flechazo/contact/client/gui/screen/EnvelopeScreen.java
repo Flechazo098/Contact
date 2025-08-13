@@ -5,7 +5,7 @@ import com.flechazo.contact.client.gui.hud.TexturePos;
 import com.flechazo.contact.client.widget.IconButton;
 import com.flechazo.contact.common.screenhandler.EnvelopeScreenHandler;
 import com.flechazo.contact.helper.GuiHelper;
-import com.flechazo.contact.network.ActionMessage;
+import com.flechazo.contact.network.ActionC2SMessage;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 
 public class EnvelopeScreen extends AbstractContainerScreen<EnvelopeScreenHandler> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(Contact.MOD_ID, "textures/gui/envelope.png");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "textures/gui/envelope.png");
     private int offsetX;
     private int offsetY;
     private IconButton buttonPack;
@@ -33,17 +33,21 @@ public class EnvelopeScreen extends AbstractContainerScreen<EnvelopeScreenHandle
         this.offsetX = (this.width - 176) / 2;
         this.offsetY = (this.height - 166) / 2 + 16;
 
-        this.buttonPack = addRenderableWidget(new IconButton(offsetX + 100, offsetY + 16, 18, 19, Component.translatable("tooltip.contact.envelope.seal"), button -> seal(), this::buttonTooltip));
+        this.buttonPack = addRenderableWidget(new IconButton(
+                offsetX + 100, offsetY + 16, 18, 19,
+                Component.translatable("tooltip.contact.envelope.seal"),
+                button -> seal(), this::buttonTooltip));
     }
 
     private void buttonTooltip(Button button, GuiGraphics guiGraphics, int mouseX, int mouseY) {
         if (button.isHovered()) {
-            GuiHelper.drawTooltip(guiGraphics, mouseX, mouseY, button.getX(), button.getY(), button.getWidth(), button.getHeight(), Lists.newArrayList(button.getMessage()));
+            GuiHelper.drawTooltip(guiGraphics, mouseX, mouseY, button.getX(), button.getY(), button.getWidth(),
+                    button.getHeight(), Lists.newArrayList(button.getMessage()));
         }
     }
 
     private void seal() {
-        ActionMessage packet = ActionMessage.create(0);
+        ActionC2SMessage packet = ActionC2SMessage.create(0);
         packet.sendToServer();
     }
 
@@ -53,7 +57,7 @@ public class EnvelopeScreen extends AbstractContainerScreen<EnvelopeScreenHandle
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, mouseX, mouseY, delta);
         super.render(guiGraphics, mouseX, mouseY, delta);
         this.renderTooltip(guiGraphics, mouseX, mouseY);
     }
@@ -66,7 +70,7 @@ public class EnvelopeScreen extends AbstractContainerScreen<EnvelopeScreenHandle
         RenderSystem.setShaderTexture(0, TEXTURE);
         GuiHelper.drawLayer(guiGraphics.pose(), offsetX, offsetY, new TexturePos(0, 0, 176, 133));
 
-        GuiHelper.renderButton(guiGraphics, delta, leftPos, topPos, 0, TEXTURE, buttonPack,
+        GuiHelper.renderButton(guiGraphics, delta, mouseX, mouseY, 0, TEXTURE, buttonPack,
                 new TexturePos(176, 0, 18, 19),
                 new TexturePos(176, 19, 18, 19));
     }

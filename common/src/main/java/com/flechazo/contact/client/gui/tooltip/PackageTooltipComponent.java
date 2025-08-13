@@ -4,14 +4,13 @@ import com.flechazo.contact.client.gui.hud.TexturePos;
 import com.flechazo.contact.client.item.PackageTooltipData;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientBundleTooltip;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 public class PackageTooltipComponent implements ClientTooltipComponent {
-    public static final ResourceLocation TEXTURE = ClientBundleTooltip.TEXTURE_LOCATION;
+    public static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/gui/sprites/container/bundle/background.png");
     private final NonNullList<ItemStack> contents;
 
     private static final TexturePos SLOT = TexturePos.create(0, 0, 18, 20);

@@ -2,17 +2,20 @@ package com.flechazo.contact.client.gui.screen;
 
 import com.flechazo.contact.client.gui.hud.TexturePos;
 import com.flechazo.contact.client.widget.ReadOnlyTextBox;
+import com.flechazo.contact.common.component.ContactDataComponents;
+import com.flechazo.contact.data.PostcardDataManager;
 import com.flechazo.contact.helper.ColorHelper;
 import com.flechazo.contact.helper.GuiHelper;
-import com.flechazo.contact.resourse.PostcardStyle;
+import com.flechazo.contact.data.PostcardStyle;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 public class PostcardReadScreen extends Screen {
@@ -24,14 +27,9 @@ public class PostcardReadScreen extends Screen {
     public PostcardReadScreen(ItemStack postcardIn) {
         super(Component.empty());
         this.postcard = postcardIn;
-        CompoundTag compoundTag = postcardIn.getOrCreateTag();
-        if (compoundTag != null) {
-            if (compoundTag.contains("Info")) {
-                style = PostcardStyle.fromNBT(compoundTag);
-            } else if (compoundTag.contains("CardID")) {
-                style = PostcardStyle.fromNBT(compoundTag);
-            } else style = PostcardStyle.DEFAULT;
-        } else style = PostcardStyle.DEFAULT;
+
+        ResourceLocation styleId = postcardIn.get(ContactDataComponents.POSTCARD_STYLE_ID.get());
+            style = PostcardDataManager.getPostcards().getOrDefault(styleId, PostcardStyle.DEFAULT);
     }
 
     @Override
@@ -49,7 +47,7 @@ public class PostcardReadScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(guiGraphics);
+        this.renderMenuBackground(guiGraphics);
         this.setFocused(null);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -62,7 +60,8 @@ public class PostcardReadScreen extends Screen {
         RenderSystem.disableBlend();
 
         textBox.render(guiGraphics, mouseX, mouseY, partialTicks);
-
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+        for (Renderable renderable : this.renderables) {
+            renderable.render(guiGraphics, mouseX, mouseY, partialTicks);
+        }
     }
 }

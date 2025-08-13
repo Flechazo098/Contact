@@ -1,5 +1,6 @@
 package com.flechazo.contact.common.screenhandler;
 
+import com.flechazo.contact.common.component.ContactDataComponents;
 import com.flechazo.contact.common.item.IMailItem;
 import com.google.common.collect.Lists;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,10 +29,10 @@ public class PostboxScreenHandler extends ContentScreenHandler {
     public PostboxScreenHandler(int id, Inventory inv, boolean isRed) {
         super(isRed ? RED_POSTBOX_CONTAINER.get() : GREEN_POSTBOX_CONTAINER.get(), id);
         this.isRed = isRed;
-        parcel.addListener(inventory ->
-        {
+        parcel.addListener(inventory -> {
             if (parcel.getItem(0).getItem() instanceof IMailItem) {
-                if (!parcel.getItem(0).getOrCreateTag().contains("Sender")) {
+                String sender = parcel.getItem(0).get(ContactDataComponents.POSTCARD_SENDER.get());
+                if (sender == null || sender.isEmpty()) {
                     status = 1;
                 } else {
                     status = 3;

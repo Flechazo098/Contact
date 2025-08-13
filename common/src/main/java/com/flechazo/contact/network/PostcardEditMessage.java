@@ -1,49 +1,50 @@
 package com.flechazo.contact.network;
 
+import com.flechazo.contact.Contact;
+import com.flechazo.contact.common.component.ContactDataComponents;
 import com.flechazo.contact.common.item.PostcardItem;
-import com.mafuyu404.oelib.api.net.INetworkContext;
-import com.mafuyu404.oelib.api.net.NetworkPacket;
-import com.mafuyu404.oelib.api.net.Side;
-import com.mafuyu404.oelib.api.net.SimplePacket;
-import net.minecraft.network.FriendlyByteBuf;
+import dev.architectury.networking.NetworkManager;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
-@NetworkPacket(side = Side.SERVER)
-public class PostcardEditMessage extends SimplePacket<PostcardEditMessage> {
-    private final ItemStack postcard;
-    private final int held;
+public record PostcardEditMessage(ItemStack postcard, int held) implements CustomPacketPayload {
 
-    public PostcardEditMessage(ItemStack postcard, int held) {
-        this.postcard = postcard;
-        this.held = held;
-    }
+    public static final CustomPacketPayload.Type<PostcardEditMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "postcard_edit_message"));
 
-    @Override
-    public void encode(FriendlyByteBuf buf) {
-        buf.writeItem(postcard);
-        buf.writeInt(held);
-    }
-
-    public static PostcardEditMessage decode(FriendlyByteBuf buf) {
-        ItemStack postcard = buf.readItem();
-        int held = buf.readInt();
-        return new PostcardEditMessage(postcard, held);
-    }
+    public static final StreamCodec<RegistryFriendlyByteBuf, PostcardEditMessage> STREAM_CODEC =
+            StreamCodec.composite(
+                    ItemStack.STREAM_CODEC, PostcardEditMessage::postcard,
+                    ByteBufCodecs.VAR_INT, PostcardEditMessage::held,
+                    PostcardEditMessage::new
+            );
 
     @Override
-    protected void handleServer(INetworkContext context) {
-        ServerPlayer player = getSender(context);
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+
+    public void handleServer(ServerPlayer player) {
         if (player == null) {
             return;
         }
 
-        if (postcard.getItem() instanceof PostcardItem && postcard.hasTag()) {
+        if (postcard.getItem() instanceof PostcardItem) {
             if (Inventory.isHotbarSlot(held) || held == 40) {
                 ItemStack card = player.getInventory().getItem(held);
                 if (card.getItem() instanceof PostcardItem) {
-                    card.setTag(postcard.getTag());
+                    String text = postcard.get(ContactDataComponents.POSTCARD_TEXT.get());
+                    ResourceLocation styleId = postcard.get(ContactDataComponents.POSTCARD_STYLE_ID.get());
+                    String sender = postcard.get(ContactDataComponents.POSTCARD_SENDER.get());
+
+                    if (text != null) card.set(ContactDataComponents.POSTCARD_TEXT.get(), text);
+                    if (styleId != null) card.set(ContactDataComponents.POSTCARD_STYLE_ID.get(), styleId);
+                    if (sender != null) card.set(ContactDataComponents.POSTCARD_SENDER.get(), sender);
                 }
             }
         }
@@ -51,5 +52,9 @@ public class PostcardEditMessage extends SimplePacket<PostcardEditMessage> {
 
     public static PostcardEditMessage create(ItemStack postcard, int held) {
         return new PostcardEditMessage(postcard, held);
+    }
+
+    public void sendToServer() {
+        NetworkManager.sendToServer(this);
     }
 }

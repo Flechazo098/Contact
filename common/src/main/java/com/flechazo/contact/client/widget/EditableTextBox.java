@@ -1,16 +1,13 @@
 package com.flechazo.contact.client.widget;
 
+import com.flechazo.contact.common.component.ContactDataComponents;
 import com.flechazo.contact.network.TextBoxEditMessage;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.StringSplitter;
@@ -27,6 +24,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -67,15 +65,10 @@ public class EditableTextBox extends AbstractWidget {
         this.editingPlayer = playerIn;
         this.hand = handIn;
 
-        CompoundTag compoundnbt = item.getTag();
-        if (compoundnbt != null) {
-            Tag tag = compoundnbt.get("Text");
-            if (tag != null) {
-                this.page = tag.copy().getAsString();
-            }
-        }
+        String text = item.get(ContactDataComponents.POSTCARD_TEXT.get());
+        this.page = text != null ? text : "";
 
-        this.textInputUtil = new TextFieldHelper(() -> page, this::setText, this::getClipboardText, this::setClipboardText, (text) -> text.length() < 1024 && this.font.wordWrapHeight(text, boxWidth) <= boxHeight * font.lineHeight / spacingPixel);
+        this.textInputUtil = new TextFieldHelper(() -> page, this::setText, this::getClipboardText, this::setClipboardText, (text1) -> text1.length() < 1024 && this.font.wordWrapHeight(text1, boxWidth) <= boxHeight * font.lineHeight / spacingPixel);
     }
 
     // Please link to Screen
@@ -85,7 +78,7 @@ public class EditableTextBox extends AbstractWidget {
 
     public void sendTextToServer() {
         if (this.isModified) {
-            this.item.getOrCreateTag().put("Text", StringTag.valueOf(this.page));
+            this.item.set(ContactDataComponents.POSTCARD_TEXT.get(), this.page);
             int i = this.hand == InteractionHand.MAIN_HAND ? this.editingPlayer.getInventory().selected : 40;
             TextBoxEditMessage packet = TextBoxEditMessage.create(item, i);
             packet.sendToServer();
@@ -313,7 +306,7 @@ public class EditableTextBox extends AbstractWidget {
     public boolean charTyped(char codePoint, int modifiers) {
         if (super.charTyped(codePoint, modifiers)) {
             return true;
-        } else if (SharedConstants.isAllowedChatCharacter(codePoint)) {
+        } else if (StringUtil.isAllowedChatCharacter(codePoint)) {
             this.textInputUtil.insertText(Character.toString(codePoint));
             this.shouldRefresh();
             return true;
@@ -323,7 +316,7 @@ public class EditableTextBox extends AbstractWidget {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         Page page = this.getPage();
 
@@ -335,32 +328,31 @@ public class EditableTextBox extends AbstractWidget {
         this.renderCursor(guiGraphics, page.point, page.isInsert);
     }
 
-    @Override
-    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-
-    }
 
     private void renderSelection(Rect2i[] selection) {
+        if (selection == null || selection.length == 0) {
+            return;
+        }
+
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionShader);
         RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
         RenderSystem.enableColorLogicOp();
         RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 
-        for (Rect2i rectangle2d : selection) {
-            int i = rectangle2d.getX();
-            int j = rectangle2d.getY();
-            int k = i + rectangle2d.getWidth();
-            int l = j + rectangle2d.getHeight();
-            bufferbuilder.vertex(i, l, 0.0D).endVertex();
-            bufferbuilder.vertex(k, l, 0.0D).endVertex();
-            bufferbuilder.vertex(k, j, 0.0D).endVertex();
-            bufferbuilder.vertex(i, j, 0.0D).endVertex();
+        for (Rect2i rect : selection) {
+            int x1 = rect.getX();
+            int y1 = rect.getY();
+            int x2 = x1 + rect.getWidth();
+            int y2 = y1 + rect.getHeight();
+            bufferBuilder.addVertex(x1, y2, 0.0F);
+            bufferBuilder.addVertex(x2, y2, 0.0F);
+            bufferBuilder.addVertex(x2, y1, 0.0F);
+            bufferBuilder.addVertex(x1, y1, 0.0F);
         }
 
-        tesselator.end();
+        BufferUploader.drawWithShader(bufferBuilder.build());
         RenderSystem.disableColorLogicOp();
     }
 

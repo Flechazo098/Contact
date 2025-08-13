@@ -17,7 +17,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,14 +26,13 @@ public final class GuiHelper {
         final float vScale = 1f / 0x100;
 
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder wr = tesselator.getBuilder();
-        wr.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        BufferBuilder wr = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         Matrix4f matrix = poseStack.last().pose();
-        wr.vertex(matrix, x, y + height, zLevel).uv(u * uScale, ((v + height) * vScale)).endVertex();
-        wr.vertex(matrix, x + width, y + height, zLevel).uv((u + width) * uScale, ((v + height) * vScale)).endVertex();
-        wr.vertex(matrix, x + width, y, zLevel).uv((u + width) * uScale, (v * vScale)).endVertex();
-        wr.vertex(matrix, x, y, zLevel).uv(u * uScale, (v * vScale)).endVertex();
-        tesselator.end();
+        wr.addVertex(matrix, x, y + height, zLevel).setUv(u * uScale, ((v + height) * vScale));
+        wr.addVertex(matrix, x + width, y + height, zLevel).setUv((u + width) * uScale, ((v + height) * vScale));
+        wr.addVertex(matrix, x + width, y, zLevel).setUv((u + width) * uScale, (v * vScale));
+        wr.addVertex(matrix, x, y, zLevel).setUv(u * uScale, (v * vScale));
+        BufferUploader.drawWithShader(wr.buildOrThrow());
     }
 
     public static void drawLayer(PoseStack poseStack, int x, int y, TexturePos pos, int z) {
@@ -93,48 +91,9 @@ public final class GuiHelper {
     }
 
 
-    public static void drawTransparentStringDefault(Font font, String text, float x, float y, int color, boolean shadow) {
-        drawSpecialString(font, text, x, y, color, shadow, true, 0, 15728880);
-    }
-
-    public static void drawSpecialString(Font font, String text, float x, float y, int color, boolean shadow, boolean transparent, int colorBackground, int packedLight) {
-        MultiBufferSource.BufferSource iRenderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        font.drawInBatch(text, x, y, color, shadow, Transformation.identity().getMatrix(), iRenderTypeBuffer, transparent ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, colorBackground, packedLight);
-        iRenderTypeBuffer.endBatch();
-    }
-
     public static void drawTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY, int x, int y, int weight, int height, List<Component> list) {
         if (x <= mouseX && mouseX <= x + weight && y <= mouseY && mouseY <= y + height) {
             guiGraphics.renderTooltip(Minecraft.getInstance().font, list, Optional.empty(), mouseX, mouseY);
         }
-    }
-
-    public static void drawFluidTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY, int x, int y, int width, int height, Component name, int amount) {
-        if (amount != 0) {
-            List<Component> list = Lists.newArrayList(name);
-            DecimalFormat df = new DecimalFormat("#,###");
-            list.add(Component.literal(df.format(amount) + " mB").withStyle(ChatFormatting.GRAY));
-            drawTooltip(guiGraphics, mouseX, mouseY, x, y, width, height, list);
-        }
-    }
-
-
-    private static float getCorrespondingUV(float min, float max, int uv) {
-        return min + (max - min) * uv / 16;
-    }
-
-    static void innerBlit(int x0, int x1, int y0, int y1, int z, float u0, float u1, float v0, float v1) {
-        RenderSystem.enableBlend();
-
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buffer = tesselator.getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.vertex(x0, y1, z).uv(u0, v1).endVertex();
-        buffer.vertex(x1, y1, z).uv(u1, v1).endVertex();
-        buffer.vertex(x1, y0, z).uv(u1, v0).endVertex();
-        buffer.vertex(x0, y0, z).uv(u0, v0).endVertex();
-        tesselator.end();
-
-        RenderSystem.disableBlend();
     }
 }

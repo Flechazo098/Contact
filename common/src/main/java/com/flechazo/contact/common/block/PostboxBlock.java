@@ -46,7 +46,7 @@ public class PostboxBlock extends DoubleHorizontalBlock implements ISilveroakEnt
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide) {
             if (player instanceof ServerPlayer sp) {
                 MenuRegistry.openExtendedMenu(sp,

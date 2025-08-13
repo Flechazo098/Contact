@@ -1,17 +1,19 @@
 package com.flechazo.contact.common.handler;
 
 import com.flechazo.contact.common.item.PostcardItem;
-import com.flechazo.contact.resourse.PostcardDataManager;
-import com.flechazo.contact.resourse.PostcardStyle;
+import com.flechazo.contact.data.PostcardDataManager;
+import com.flechazo.contact.data.PostcardStyle;
 import dev.architectury.event.EventResult;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
+
+import java.util.Optional;
 
 public final class WanderingTraderSaleHandler {
     public static EventResult interact(Player player, Entity entity, InteractionHand hand) {
@@ -34,8 +36,17 @@ public final class WanderingTraderSaleHandler {
                     }
 
                     if (style.trade().soldByTrader()) {
-                        trader.getOffers().add(0, new MerchantOffer(style.trade().price(), new ItemStack(Items.ENDER_PEARL), PostcardItem.getPostcard(id, true), 16, 10, 0.05F));
-                        trader.getOffers().add(0, new MerchantOffer(style.trade().price(), PostcardItem.getPostcard(id, false), 16, 10, 0.05F));
+                        trader.getOffers().add(0, new MerchantOffer(
+                                new ItemCost(style.trade().price().getItem(), style.trade().price().getCount()),
+                                Optional.of(new ItemCost(Items.ENDER_PEARL)),
+                                PostcardItem.getPostcard(id, true),
+                                16, 10, 0.05F
+                        ));
+                        trader.getOffers().add(0, new MerchantOffer(
+                                new ItemCost(style.trade().price().getItem(), style.trade().price().getCount()),
+                                PostcardItem.getPostcard(id, false),
+                                16, 10, 0.05F
+                        ));
                     }
                 }
             }

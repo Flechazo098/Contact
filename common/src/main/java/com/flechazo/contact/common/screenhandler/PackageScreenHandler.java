@@ -1,10 +1,12 @@
 package com.flechazo.contact.common.screenhandler;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class PackageScreenHandler extends ContentScreenHandler {
@@ -59,7 +61,7 @@ public abstract class PackageScreenHandler extends ContentScreenHandler {
                 }
             } else {
                 ItemStack parcel = getPackedItem();
-                parcel.getOrCreateTag().put("parcel", getContainer().createTag());
+                parcel.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(getContainer().getItems()));
                 if (!player.isAlive() || ((ServerPlayer) player).hasDisconnected()) {
                     player.drop(parcel, false);
                 } else {

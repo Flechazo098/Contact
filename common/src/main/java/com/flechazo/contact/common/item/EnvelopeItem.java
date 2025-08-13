@@ -16,7 +16,7 @@ public class EnvelopeItem extends NormalItem {
     private static final Component CONTAINER_NAME = Component.translatable("container.contact.envelope");
 
     public EnvelopeItem() {
-        super(new ResourceLocation(Contact.MOD_ID, "envelope"), Contact.ITEM_GROUP);
+        super(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "envelope"), Contact.ITEM_GROUP);
     }
 
     @Override

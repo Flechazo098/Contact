@@ -2,7 +2,7 @@ package com.flechazo.contact.common.handler;
 
 import com.flechazo.contact.common.storage.IMailboxDataProvider;
 import com.flechazo.contact.common.storage.MailboxDataManager;
-import com.flechazo.contact.network.ActionMessage;
+import com.flechazo.contact.network.ActionS2CMessage;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
@@ -19,7 +19,7 @@ public final class AddresseeSignInHandler {
             data.resetMailboxContents(uuid);
         } else {
             if (!data.isMailboxEmpty(uuid)) {
-                ActionMessage packet = ActionMessage.create(0);
+                ActionS2CMessage packet = ActionS2CMessage.create(0);
                 packet.sendTo(player);
             }
             updateState(uuid, data.data());
