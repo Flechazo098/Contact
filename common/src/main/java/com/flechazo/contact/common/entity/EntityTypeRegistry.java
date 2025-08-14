@@ -25,7 +25,4 @@ public final class EntityTypeRegistry {
     private static <T extends Entity> RegistrySupplier<EntityType<T>> register(String name, Supplier<EntityType<T>> entity) {
         return ENTITY_TYPES.register(name, entity);
     }
-
-    public static void init() {
-    }
 }

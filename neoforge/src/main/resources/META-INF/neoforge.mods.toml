@@ -43,7 +43,7 @@ side = "BOTH"
 [[dependencies.contact]]
 modId = "jupiter"
 mandatory = true
-versionRange = "[2.0)"
+versionRange = "[2.0, )"
 ordering = "NONE"
 side = "BOTH"
 

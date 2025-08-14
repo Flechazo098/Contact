@@ -17,6 +17,5 @@ public final class ContactFabric implements ModInitializer {
         DataRegistry.register(PostcardStyle.class);
         PostcardDataManager.initialize();
         Contact.init();
-
     }
 }

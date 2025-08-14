@@ -42,7 +42,9 @@ public record PostcardEditMessage(ItemStack postcard, int held) implements Custo
                     ResourceLocation styleId = postcard.get(ContactDataComponents.POSTCARD_STYLE_ID.get());
                     String sender = postcard.get(ContactDataComponents.POSTCARD_SENDER.get());
 
-                    if (text != null) card.set(ContactDataComponents.POSTCARD_TEXT.get(), text);
+                    if (text != null) {
+                        card.set(ContactDataComponents.POSTCARD_TEXT.get(), text);
+                    }
                     if (styleId != null) card.set(ContactDataComponents.POSTCARD_STYLE_ID.get(), styleId);
                     if (sender != null) card.set(ContactDataComponents.POSTCARD_SENDER.get(), sender);
                 }

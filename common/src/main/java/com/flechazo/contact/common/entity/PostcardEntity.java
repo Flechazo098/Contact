@@ -304,7 +304,7 @@ public class PostcardEntity extends HangingEntity {
     }
 
     @Override
-    public float getYRot() {
+    public float getVisualRotationYInDegrees() {
         Direction direction = this.getDirection();
         int i = direction.getAxis().isVertical() ? 90 * direction.getAxisDirection().getStep() : 0;
         return Mth.wrapDegrees(180 + direction.get2DDataValue() * 90 + this.getRotation() * 45 + i);

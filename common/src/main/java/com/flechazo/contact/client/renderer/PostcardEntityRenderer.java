@@ -10,6 +10,7 @@ import com.flechazo.contact.data.PostcardStyle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import dev.architectury.platform.Platform;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -34,8 +35,11 @@ import org.joml.Matrix4f;
 import java.util.List;
 
 public class PostcardEntityRenderer<T extends PostcardEntity> extends EntityRenderer<T> {
-    private static final ModelResourceLocation PIN = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "postcard_pin"), "");
-    private static final ModelResourceLocation POSTCARD = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "postcard_pin"), "");
+    private static final ModelResourceLocation PIN_NEO = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "block/postcard_pin"), "standalone");
+    private static final ModelResourceLocation POSTCARD_NEO = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "block/postcard"), "standalone");
+
+    private static final ModelResourceLocation PIN_FA = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "block/postcard_pin"), "fabric_resource");
+    private static final ModelResourceLocation POSTCARD_FA = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "block/postcard"), "fabric_resource");
     private final BlockRenderDispatcher blockRenderDispatcher;
     private final List<String> list = Lists.newArrayList();
     private int textHash = 0;
@@ -81,14 +85,24 @@ public class PostcardEntityRenderer<T extends PostcardEntity> extends EntityRend
                 poseStack.pushPose();
                 poseStack.translate(-0.5f, -0.5f, -0.5f);
                 poseStack.translate(0.0f, -(128 - height) / 256.0f, 0.0f);
-                this.blockRenderDispatcher.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(Sheets.solidBlockSheet()), null, modelManager.getModel(PIN), red, green, blue, light, OverlayTexture.NO_OVERLAY);
+                if (Platform.isFabric()) {
+                    this.blockRenderDispatcher.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(Sheets.solidBlockSheet()), null, modelManager.getModel(PIN_FA), red, green, blue, light, OverlayTexture.NO_OVERLAY);
+                }
+                if (Platform.isNeoForge()){
+                    this.blockRenderDispatcher.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(Sheets.solidBlockSheet()), null, modelManager.getModel(PIN_NEO), red, green, blue, light, OverlayTexture.NO_OVERLAY);
+                }
                 poseStack.popPose();
             }
 
             poseStack.pushPose();
             poseStack.scale(width / 128.0f, height / 128.0f, 1.0f);
             poseStack.translate(-0.5f, -0.5f, -0.5f);
-            this.blockRenderDispatcher.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(Sheets.solidBlockSheet()), null, modelManager.getModel(POSTCARD), 1.0f, 1.0f, 1.0f, light, OverlayTexture.NO_OVERLAY);
+            if (Platform.isFabric()) {
+                this.blockRenderDispatcher.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(Sheets.solidBlockSheet()), null, modelManager.getModel(POSTCARD_FA), 1.0f, 1.0f, 1.0f, light, OverlayTexture.NO_OVERLAY);
+            }
+            if (Platform.isNeoForge()) {
+                this.blockRenderDispatcher.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(Sheets.solidBlockSheet()), null, modelManager.getModel(POSTCARD_NEO), 1.0f, 1.0f, 1.0f, light, OverlayTexture.NO_OVERLAY);
+            }
             poseStack.popPose();
 
             poseStack.translate(0.0f, 0.0f, 0.5f);

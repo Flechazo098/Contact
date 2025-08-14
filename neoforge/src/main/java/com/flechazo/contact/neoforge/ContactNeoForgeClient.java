@@ -2,19 +2,26 @@ package com.flechazo.contact.neoforge;
 
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.ContactClient;
+import com.flechazo.contact.client.ClientProxy;
+import com.flechazo.contact.client.gui.screen.EnvelopeScreen;
+import com.flechazo.contact.client.gui.screen.PostboxScreen;
+import com.flechazo.contact.client.gui.screen.RedPacketEnvelopeScreen;
+import com.flechazo.contact.client.gui.screen.WrappingPaperScreen;
 import com.flechazo.contact.client.gui.tooltip.PackageTooltipComponent;
 import com.flechazo.contact.client.item.PackageTooltipData;
 import com.flechazo.contact.client.renderer.MailboxTileEntityRenderer;
+import com.flechazo.contact.client.renderer.PostcardEntityRenderer;
+import com.flechazo.contact.common.entity.EntityTypeRegistry;
 import com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry;
 import com.flechazo.contact.common.tileentity.BlockEntityTypeRegistry;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
-import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
-import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.*;
 
 import static com.flechazo.contact.ContactClient.BLOCK_MAILBOX_COLOR;
 import static com.flechazo.contact.ContactClient.ITEM_MAILBOX_COLOR;
@@ -51,15 +58,20 @@ public class ContactNeoForgeClient {
     @SubscribeEvent
     public static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
         event.register(ScreenHandlerTypeRegistry.WRAPPING_PAPER_CONTAINER.get(),
-                com.flechazo.contact.client.gui.screen.WrappingPaperScreen::new);
+                WrappingPaperScreen::new);
         event.register(ScreenHandlerTypeRegistry.ENVELOPE_CONTAINER.get(),
-                com.flechazo.contact.client.gui.screen.EnvelopeScreen::new);
+                EnvelopeScreen::new);
         event.register(ScreenHandlerTypeRegistry.RED_PACKET_ENVELOPE_CONTAINER.get(),
-                com.flechazo.contact.client.gui.screen.RedPacketEnvelopeScreen::new);
+                RedPacketEnvelopeScreen::new);
         event.register(ScreenHandlerTypeRegistry.RED_POSTBOX_CONTAINER.get(),
-                com.flechazo.contact.client.gui.screen.PostboxScreen::new);
+                PostboxScreen::new);
         event.register(ScreenHandlerTypeRegistry.GREEN_POSTBOX_CONTAINER.get(),
-                com.flechazo.contact.client.gui.screen.PostboxScreen::new);
+                PostboxScreen::new);
+    }
+
+    @SubscribeEvent
+    public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(EntityTypeRegistry.POSTCARD.get(), PostcardEntityRenderer::new);
     }
 
     @SubscribeEvent
@@ -78,5 +90,11 @@ public class ContactNeoForgeClient {
                 LIME_MAILBOX_ITEM.get(), PINK_MAILBOX_ITEM.get(), GRAY_MAILBOX_ITEM.get(), LIGHT_GRAY_MAILBOX_ITEM.get(),
                 CYAN_MAILBOX_ITEM.get(), PURPLE_MAILBOX_ITEM.get(), BLUE_MAILBOX_ITEM.get(), BROWN_MAILBOX_ITEM.get(),
                 GREEN_MAILBOX_ITEM.get(), RED_MAILBOX_ITEM.get(), BLACK_MAILBOX_ITEM.get(), WHITE_MAILBOX_ITEM.get());
+    }
+
+    @SubscribeEvent
+    public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
+        event.register(new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "block/postcard_pin"), ModelResourceLocation.STANDALONE_VARIANT));
+        event.register(new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "block/postcard"), ModelResourceLocation.STANDALONE_VARIANT));
     }
 }

@@ -51,6 +51,5 @@ public final class ScreenHandlerTypeRegistry {
         MenuRegistry.registerScreenFactory(RED_PACKET_ENVELOPE_CONTAINER.get(), RedPacketEnvelopeScreen::new);
         MenuRegistry.registerScreenFactory(RED_POSTBOX_CONTAINER.get(), PostboxScreen::new);
         MenuRegistry.registerScreenFactory(GREEN_POSTBOX_CONTAINER.get(), PostboxScreen::new);
-        System.out.println("Screen注册完了");
     }
 }

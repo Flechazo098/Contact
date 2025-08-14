@@ -2,7 +2,7 @@
   "variants": {
     "": [
       {
-        "model": "contact:block/pin"
+        "model": "contact:block/postcard_pin"
       }
     ]
   }

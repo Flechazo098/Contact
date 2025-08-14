@@ -1,7 +1,7 @@
 package com.flechazo.contact.client.widget;
 
 import com.flechazo.contact.common.component.ContactDataComponents;
-import com.flechazo.contact.network.TextBoxEditMessage;
+import com.flechazo.contact.network.PostcardEditMessage;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -19,9 +19,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.StringUtil;
@@ -80,7 +77,7 @@ public class EditableTextBox extends AbstractWidget {
         if (this.isModified) {
             this.item.set(ContactDataComponents.POSTCARD_TEXT.get(), this.page);
             int i = this.hand == InteractionHand.MAIN_HAND ? this.editingPlayer.getInventory().selected : 40;
-            TextBoxEditMessage packet = TextBoxEditMessage.create(item, i);
+            PostcardEditMessage packet = PostcardEditMessage.create(item, i);
             packet.sendToServer();
         }
     }
