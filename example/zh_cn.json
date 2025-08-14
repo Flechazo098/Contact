@@ -1,0 +1,39 @@
+{
+  "postcard": { // 明信片设置
+    "texture": "contact:autumn_dusk", // 明信片背景的纹理路径
+    "width": 200, // 明信片宽度（像素）
+    "height": 133 // 明信片高度（像素）
+  },
+  "trade": { // 交易信息
+    "soldByTrader": true, // 是否由流浪商人出售
+    "price": { // 价格设置
+      "id": "minecraft:emerald", // 作为货币的物品 ID
+      "count": 1 // 所需物品数量
+    }
+  },
+  "text": { // 文本区域设置
+    "x": 10, // 文本区域的 X 坐标（相对明信片）
+    "y": 12, // 文本区域的 Y 坐标
+    "width": 180, // 文本区域宽度
+    "height": 96, // 文本区域高度
+    "color": { // 文本颜色（RGBA）
+      "alpha": 255, // 透明度（255 = 完全不透明）
+      "red": 183, // 红色通道值
+      "green": 111, // 绿色通道值
+      "blue": 64 // 蓝色通道值
+    }
+  },
+  "postmark": { // 邮戳设置
+    "texture": "contact:postmark", // 邮戳的纹理路径
+    "x": 142, // 邮戳的 X 坐标
+    "y": -5, // 邮戳的 Y 坐标
+    "width": 64, // 邮戳宽度
+    "height": 52, // 邮戳高度
+    "color": { // 邮戳颜色（RGBA）
+      "alpha": 120, // 透明度
+      "red": 182, // 红色通道值
+      "green": 153, // 绿色通道值
+      "blue": 104 // 蓝色通道值
+    }
+  }
+}

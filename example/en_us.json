@@ -1,0 +1,39 @@
+{
+  "postcard": { // Postcard settings
+    "texture": "contact:autumn_dusk", // Texture path for the postcard background
+    "width": 200, // Width of the postcard in pixels
+    "height": 133 // Height of the postcard in pixels
+  },
+  "trade": { // Trading information
+    "soldByTrader": true, // Whether it can be sold by a Wandering Trader
+    "price": { // Price settings
+      "id": "minecraft:emerald", // Item ID used as currency
+      "count": 1 // Number of items required
+    }
+  },
+  "text": { // Text area settings
+    "x": 10, // X position of text area (relative to postcard)
+    "y": 12, // Y position of text area
+    "width": 180, // Width of text area
+    "height": 96, // Height of text area
+    "color": { // Text color (RGBA
+      "alpha": 255, // Transparency
+      "red": 183, // Red channel value
+      "green": 111, // Green channel value
+      "blue": 64 // Blue channel value
+    }
+  },
+  "postmark": { // Postmark (stamp mark) setting
+    "texture": "contact:postmark", // Texture path for the postmark
+    "x": 142, // X position of postmark
+    "y": -5, // Y position of postmark
+    "width": 64, // Width of postmark
+    "height": 52, // Height of postmark
+    "color": { // Postmark color (RGBA)
+      "alpha": 120, // Transparency
+      "red": 182, // Red channel value
+      "green": 153, // Green channel value
+      "blue": 104 // Blue channel value
+    }
+  }
+}

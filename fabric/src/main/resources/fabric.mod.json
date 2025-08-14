@@ -34,7 +34,7 @@
     "java": ">=17",
     "architectury": ">=9.2.14",
     "fabric-api": "*",
-    "oelib": ">=0.0.4-beta2",
+    "oelib": ">=0.0.4-beta",
     "jupiter": ">=2.0"
   },
   "suggests": {
