@@ -11,7 +11,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 
-@NetworkPacket(side = Side.CLIENT)
+@NetworkPacket(side = Side.BOTH)
 public class AddresseeDataMessage extends SimplePacket<AddresseeDataMessage> {
     private final List<String> names;
     private final List<Integer> ticks; // -1 means mailbox is full, -2 means no mailbox
@@ -52,12 +52,10 @@ public class AddresseeDataMessage extends SimplePacket<AddresseeDataMessage> {
         Minecraft client = getClient(context);
         if (client == null || client.player == null) return;
 
-        client.execute(() -> {
-            if (client.player.containerMenu instanceof PostboxScreenHandler container) {
+        if (client.player.containerMenu instanceof PostboxScreenHandler container) {
                 container.names = names;
                 container.ticks = ticks;
             }
-        });
     }
 
     public static AddresseeDataMessage create(List<String> names, List<Integer> ticks) {

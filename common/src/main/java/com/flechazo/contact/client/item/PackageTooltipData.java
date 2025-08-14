@@ -7,11 +7,15 @@ import net.minecraft.world.item.ItemStack;
 public record PackageTooltipData(NonNullList<ItemStack> contents) implements TooltipComponent {
     public PackageTooltipData(NonNullList<ItemStack> contents) {
         NonNullList<ItemStack> list = NonNullList.create();
-        for (ItemStack content : contents) {
-            if (!content.isEmpty()) {
-                list.add(content);
+
+        if (contents != null) {
+            for (ItemStack content : contents) {
+                if (content != null && !content.isEmpty()) {
+                    list.add(content);
+                }
             }
         }
+
         this.contents = list;
     }
 }

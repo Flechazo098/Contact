@@ -28,7 +28,6 @@ public final class ContactFabricClient implements ClientModInitializer, ModelLoa
             ScreenHandlerTypeRegistry.registerContainers();
         });
         BlockEntityRenderers.register(BlockEntityTypeRegistry.MAILBOX_BLOCK_ENTITY.get(), MailboxTileEntityRenderer::new);
-        ClientProxy.bindEntityRenderer();
         BlockColorsRegistry.init();
         ItemColorsRegistry.init();
         BlockRegistry.registerRenderLayer();

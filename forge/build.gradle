@@ -2,10 +2,6 @@ plugins {
     id 'com.github.johnrengelman.shadow'
 }
 
-loom {
-    accessWidenerPath = project(":common").loom.accessWidenerPath
-}
-
 architectury {
     platformSetupLoomIde()
     forge()
@@ -35,7 +31,7 @@ dependencies {
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
-    modImplementation "curse.maven:oelib-1319210:6875027"
+    modImplementation(files("../libs/OELib-forge-0.0.4-beta2.jar"))
     modImplementation "curse.maven:jupiter-1072905:6843043"
 }
 

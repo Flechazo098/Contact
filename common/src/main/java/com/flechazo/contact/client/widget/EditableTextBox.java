@@ -1,5 +1,6 @@
 package com.flechazo.contact.client.widget;
 
+import com.flechazo.contact.network.PostcardEditMessage;
 import com.flechazo.contact.network.TextBoxEditMessage;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -87,7 +88,7 @@ public class EditableTextBox extends AbstractWidget {
         if (this.isModified) {
             this.item.getOrCreateTag().put("Text", StringTag.valueOf(this.page));
             int i = this.hand == InteractionHand.MAIN_HAND ? this.editingPlayer.getInventory().selected : 40;
-            TextBoxEditMessage packet = TextBoxEditMessage.create(item, i);
+            PostcardEditMessage packet = PostcardEditMessage.create(item, i);
             packet.sendToServer();
         }
     }

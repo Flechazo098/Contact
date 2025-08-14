@@ -1,6 +1,7 @@
 package com.flechazo.contact.common.item;
 
 import com.flechazo.contact.client.item.PackageTooltipData;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.InteractionHand;
@@ -47,6 +48,14 @@ public interface IPackageItem {
         SimpleContainer contents = new SimpleContainer(item.getCapacity());
         ListTag list = stack.getOrCreateTag().getList("parcel", Tag.TAG_COMPOUND);
         contents.fromTag(list);
-        return new PackageTooltipData(contents.items);
+
+        NonNullList<ItemStack> toShow = NonNullList.create();
+        for (int i = 0; i < contents.getContainerSize(); i++) {
+            ItemStack content = contents.getItem(i);
+            if (!content.isEmpty()) {
+                toShow.add(content.copy());
+            }
+        }
+        return new PackageTooltipData(toShow);
     }
 }
