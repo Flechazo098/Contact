@@ -11,6 +11,8 @@ import com.flechazo.contact.client.renderer.MailboxTileEntityRenderer;
 import com.flechazo.contact.client.renderer.PostcardEntityRenderer;
 import com.flechazo.contact.common.entity.EntityTypeRegistry;
 import com.flechazo.contact.common.tileentity.BlockEntityTypeRegistry;
+import com.flechazo.contact.network.AddresseeDataMessage;
+import com.mafuyu404.oelib.api.net.NetworkManager;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
@@ -50,6 +52,7 @@ public class ContactForgeClient {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
             BlockEntityRenderers.register(BlockEntityTypeRegistry.MAILBOX_BLOCK_ENTITY.get(), MailboxTileEntityRenderer::new);
+            NetworkManager.registerPackets(AddresseeDataMessage.class);
             ContactClient.onInitializeClient();
     }
 

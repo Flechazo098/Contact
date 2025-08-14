@@ -23,7 +23,7 @@ public final class ContactForge {
     }
 
     public void commonSetup(FMLCommonSetupEvent event) {
-        NetworkManager.registerPackets(ActionMessage.class, AddresseeDataMessage.class, EnquireAddresseeMessage.class, PostcardEditMessage.class, TextBoxEditMessage.class);
+        NetworkManager.registerPackets(ActionMessage.class, EnquireAddresseeMessage.class, PostcardEditMessage.class, TextBoxEditMessage.class);
         VersionCheckHandler.register();
     }
 }
