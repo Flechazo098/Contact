@@ -37,16 +37,19 @@ public class PostcardEntity extends HangingEntity {
     private static final EntityDataAccessor<Integer> ROTATION = SynchedEntityData.defineId(PostcardEntity.class, EntityDataSerializers.INT);
     private boolean fixed;
 
-    public PostcardEntity(EntityType<? extends HangingEntity> entityType, Level level) {
+    public PostcardEntity(EntityType<? extends HangingEntity> entityType, Level level)
+    {
         super(entityType, level);
     }
 
-    public PostcardEntity(Level level, BlockPos pos, Direction facing) {
+    public PostcardEntity(Level level, BlockPos pos, Direction facing)
+    {
         this(POSTCARD.get(), level, pos, facing);
     }
 
-    public PostcardEntity(EntityType<? extends HangingEntity> type, Level level, BlockPos pos, Direction facing) {
-        super(type, level, pos);
+    public PostcardEntity(EntityType<? extends HangingEntity> type, Level world, BlockPos pos, Direction facing)
+    {
+        super(type, world, pos);
         this.setDirection(facing);
     }
 
@@ -63,14 +66,14 @@ public class PostcardEntity extends HangingEntity {
     }
 
     @Override
-    protected void setDirection(Direction facing) {
-        Validate.notNull(facing);
-        this.direction = facing;
-        if (facing.getAxis().isHorizontal()) {
+    protected void setDirection(Direction direction) {
+        Validate.notNull(direction);
+        this.direction = direction;
+        if (direction.getAxis().isHorizontal()) {
             this.setXRot(0.0f);
             this.setYRot(this.direction.get2DDataValue() * 90);
         } else {
-            this.setXRot(-90 * facing.getAxisDirection().getStep());
+            this.setXRot(-90 * direction.getAxisDirection().getStep());
             this.setYRot(0.0f);
         }
         this.xRotO = this.getXRot();
@@ -80,10 +83,14 @@ public class PostcardEntity extends HangingEntity {
 
     @Override
     protected void recalculateBoundingBox() {
+        if (this.direction == null)
+        {
+            return;
+        }
         double e = (double) this.pos.getX() + 0.5 - (double) this.direction.getStepX() * 0.46875;
         double f = (double) this.pos.getY() + 0.5 - (double) this.direction.getStepY() * 0.46875;
         double g = (double) this.pos.getZ() + 0.5 - (double) this.direction.getStepZ() * 0.46875;
-        this.setPos(e, f, g);
+        this.setPosRaw(e, f, g);
         double h = this.getWidth();
         double i = this.getHeight();
         double j = this.getWidth();
@@ -303,7 +310,7 @@ public class PostcardEntity extends HangingEntity {
     }
 
     @Override
-    public float getYRot() {
+    public float getVisualRotationYInDegrees() {
         Direction direction = this.getDirection();
         int i = direction.getAxis().isVertical() ? 90 * direction.getAxisDirection().getStep() : 0;
         return Mth.wrapDegrees(180 + direction.get2DDataValue() * 90 + this.getRotation() * 45 + i);

@@ -8,12 +8,16 @@ import com.flechazo.contact.client.color.item.MailboxItemColor;
 import com.flechazo.contact.client.gui.tooltip.PackageTooltipComponent;
 import com.flechazo.contact.client.item.PackageTooltipData;
 import com.flechazo.contact.client.renderer.MailboxTileEntityRenderer;
+import com.flechazo.contact.client.renderer.PostcardEntityRenderer;
+import com.flechazo.contact.common.entity.EntityTypeRegistry;
 import com.flechazo.contact.common.tileentity.BlockEntityTypeRegistry;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
@@ -45,15 +49,18 @@ public class ContactForgeClient {
     public static final ItemColor ITEM_MAILBOX_COLOR = new MailboxItemColor();
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> {
             BlockEntityRenderers.register(BlockEntityTypeRegistry.MAILBOX_BLOCK_ENTITY.get(), MailboxTileEntityRenderer::new);
             ContactClient.onInitializeClient();
-        });
     }
 
     @SubscribeEvent
     public static void onRegisterClientTooltipComponentFactories(RegisterClientTooltipComponentFactoriesEvent event) {
         event.register(PackageTooltipData.class, PackageTooltipComponent::new);
+    }
+
+    @SubscribeEvent
+    public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(EntityTypeRegistry.POSTCARD.get(), PostcardEntityRenderer::new);
     }
 
     @SubscribeEvent

@@ -24,9 +24,6 @@ public class ClientProxy {
     private static final Map<PostcardStyle, RenderType> CARD_RENDER_LAYERS = Maps.newHashMap();
     private static final Map<PostcardStyle, RenderType> POSTMARK_RENDER_LAYERS = Maps.newHashMap();
 
-    public static void bindEntityRenderer() {
-        EntityRendererRegistry.register(EntityTypeRegistry.POSTCARD, PostcardEntityRenderer::new);
-    }
 
     public static void openPostcardToEdit(ItemStack itemstack, Player playerIn, InteractionHand handIn) {
         Minecraft.getInstance().setScreen(new PostcardEditScreen(itemstack, playerIn, handIn));

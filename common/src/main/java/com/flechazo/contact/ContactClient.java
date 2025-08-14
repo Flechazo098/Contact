@@ -1,6 +1,5 @@
 package com.flechazo.contact;
 
-import com.flechazo.contact.client.ClientProxy;
 import com.flechazo.contact.common.block.BlockRegistry;
 import com.flechazo.contact.common.config.ContactClientConfig;
 import com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry;
@@ -13,7 +12,6 @@ public class ContactClient {
     public static void onInitializeClient() {
         ConfigManager.getInstance().registerConfigHandler(ContactClientConfig.INSTANCE);
         ScreenHandlerTypeRegistry.registerContainers();
-        ClientProxy.bindEntityRenderer();
         BlockRegistry.registerRenderLayer();
     }
 }

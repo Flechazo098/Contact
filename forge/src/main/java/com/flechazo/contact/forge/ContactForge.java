@@ -3,6 +3,7 @@ package com.flechazo.contact.forge;
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.forge.network.VersionCheckHandler;
 import com.flechazo.contact.network.*;
+import com.flechazo.contact.resourse.PostcardDataManager;
 import com.flechazo.contact.resourse.PostcardStyle;
 import com.mafuyu404.oelib.api.net.NetworkManager;
 import com.mafuyu404.oelib.forge.data.DataRegistry;
@@ -16,6 +17,7 @@ public final class ContactForge {
     public ContactForge() {
         EventBuses.registerModEventBus(Contact.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
         DataRegistry.register(PostcardStyle.class);
+        PostcardDataManager.initialize();
         Contact.init();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
     }
