@@ -11,7 +11,7 @@ authors = ""
 description = '''
 
 '''
-#logoFile = ""
+logoFile = "assets/contact/logo.png"
 
 [[dependencies.contact]]
 modId = "forge"
@@ -32,4 +32,18 @@ modId = "architectury"
 mandatory = true
 versionRange = "[9.2.14,)"
 ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.contact]]
+modId = "oelib"
+mandatory = true
+versionRange = "[0.0.4-beta,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.contact]]
+modId = "jupiter"
+mandatory = true
+versionRange = "[2.0, )"
+ordering = "NONE"
 side = "BOTH"
