@@ -4,13 +4,13 @@
   "group": "postbox",
   "key": {
     "*": {
-      "tag": "c:green_dyes"
+      "tag": "forge:dyes/red"
     },
     "+": {
       "item": "minecraft:stone"
     },
     "x": {
-      "tag": "c:iron_ingots"
+      "tag": "forge:ingots/iron"
     }
   },
   "pattern": [
@@ -19,6 +19,6 @@
     "+++"
   ],
   "result": {
-    "item": "contact:green_postbox"
+    "item": "contact:red_postbox"
   }
 }

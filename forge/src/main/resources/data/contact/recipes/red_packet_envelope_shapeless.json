@@ -1,16 +1,16 @@
 {
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
-  "group": "dyed_mailbox",
+  "group": "red_packet",
   "ingredients": [
     {
-      "tag": "c:black_dyes"
+      "tag": "forge:dyes/red"
     },
     {
-      "item": "contact:white_mailbox"
+      "item": "contact:envelope"
     }
   ],
   "result": {
-    "item": "contact:black_mailbox"
+    "item": "contact:red_packet_envelope"
   }
 }

@@ -4,13 +4,13 @@
   "group": "dyed_mailbox",
   "ingredients": [
     {
-      "tag": "c:light_blue_dyes"
+      "tag": "forge:dyes/orange"
     },
     {
       "item": "contact:white_mailbox"
     }
   ],
   "result": {
-    "item": "contact:light_blue_mailbox"
+    "item": "contact:orange_mailbox"
   }
 }

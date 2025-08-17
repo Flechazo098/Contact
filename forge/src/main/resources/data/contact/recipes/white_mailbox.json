@@ -7,7 +7,7 @@
       "item": "minecraft:stick"
     },
     "x": {
-      "tag": "c:iron_ingots"
+      "tag": "forge:ingots/iron"
     }
   },
   "pattern": [

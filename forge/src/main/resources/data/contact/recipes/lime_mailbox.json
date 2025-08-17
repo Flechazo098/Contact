@@ -4,13 +4,13 @@
   "group": "dyed_mailbox",
   "ingredients": [
     {
-      "tag": "c:green_dyes"
+      "tag": "forge:dyes/lime"
     },
     {
       "item": "contact:white_mailbox"
     }
   ],
   "result": {
-    "item": "contact:green_mailbox"
+    "item": "contact:lime_mailbox"
   }
 }

@@ -31,7 +31,8 @@ dependencies {
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
-    modImplementation(files("../libs/OELib-forge-0.0.4-beta2.jar"))
+    modImplementation "curse.maven:oelib-1319210:6884828"
+    modRuntimeOnly("mezz.jei:jei-1.20.1-forge:15.20.0.104")
     modImplementation "curse.maven:jupiter-1072905:6843043"
 }
 
