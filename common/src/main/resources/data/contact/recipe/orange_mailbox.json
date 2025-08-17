@@ -4,7 +4,7 @@
   "group": "dyed_mailbox",
   "ingredients": [
     {
-      "tag": "c:orange_dyes"
+      "tag": "c:dyes/orange"
     },
     {
       "item": "contact:white_mailbox"

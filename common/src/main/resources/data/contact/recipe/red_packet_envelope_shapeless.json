@@ -4,7 +4,7 @@
   "group": "red_packet",
   "ingredients": [
     {
-      "tag": "c:red_dyes"
+      "tag": "c:dyes/red"
     },
     {
       "item": "contact:envelope"

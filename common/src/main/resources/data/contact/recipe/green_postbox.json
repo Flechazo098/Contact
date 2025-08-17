@@ -4,13 +4,13 @@
   "group": "postbox",
   "key": {
     "*": {
-      "tag": "c:green_dyes"
+      "tag": "c:dyes/green"
     },
     "+": {
       "item": "minecraft:stone"
     },
     "x": {
-      "tag": "c:iron_ingots"
+      "tag": "c:ingots/iron"
     }
   },
   "pattern": [
