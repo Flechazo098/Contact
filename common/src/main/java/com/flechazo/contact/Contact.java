@@ -11,6 +11,10 @@ import com.flechazo.contact.common.item.ItemRegistry;
 import com.flechazo.contact.common.registry.ModCreativeTabRegistry;
 import com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry;
 import com.flechazo.contact.common.tileentity.BlockEntityTypeRegistry;
+import com.flechazo.contact.network.ActionMessage;
+import com.flechazo.contact.network.EnquireAddresseeMessage;
+import com.flechazo.contact.network.PostcardEditMessage;
+import com.flechazo.contact.network.TextBoxEditMessage;
 import com.iafenvoy.jupiter.ConfigManager;
 import com.iafenvoy.jupiter.ServerConfigManager;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
@@ -63,5 +67,10 @@ public final class Contact {
         TickEvent.SERVER_PRE.register(MailboxManager::onServerTick);
         InteractionEvent.INTERACT_ENTITY.register(WanderingTraderSaleHandler::interact);
         PlayerEvent.PLAYER_JOIN.register(AddresseeSignInHandler::onPlayerLoggedIn);
+
+        ActionMessage.registerC2S();
+        EnquireAddresseeMessage.registerC2S();
+        PostcardEditMessage.registerC2S();
+        TextBoxEditMessage.registerC2S();
     }
 }

@@ -1,18 +1,20 @@
 package com.flechazo.contact.network;
 
+import com.flechazo.contact.Contact;
 import com.flechazo.contact.common.screenhandler.PostboxScreenHandler;
-import com.mafuyu404.oelib.api.net.INetworkContext;
-import com.mafuyu404.oelib.api.net.NetworkPacket;
-import com.mafuyu404.oelib.api.net.Side;
-import com.mafuyu404.oelib.api.net.SimplePacket;
+import dev.architectury.networking.NetworkManager;
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@NetworkPacket(side = Side.BOTH)
-public class AddresseeDataMessage extends SimplePacket<AddresseeDataMessage> {
+public class AddresseeDataMessage {
+    private static final ResourceLocation ID = new ResourceLocation(Contact.MOD_ID, "addressee_data");
+
     private final List<String> names;
     private final List<Integer> ticks; // -1 means mailbox is full, -2 means no mailbox
 
@@ -21,7 +23,6 @@ public class AddresseeDataMessage extends SimplePacket<AddresseeDataMessage> {
         this.ticks = ticks;
     }
 
-    @Override
     public void encode(FriendlyByteBuf buf) {
         buf.writeInt(names.size());
         for (String name : names) {
@@ -47,18 +48,31 @@ public class AddresseeDataMessage extends SimplePacket<AddresseeDataMessage> {
         return new AddresseeDataMessage(names, ticks);
     }
 
-    @Override
-    protected void handleClient(INetworkContext context) {
-        Minecraft client = getClient(context);
-        if (client == null || client.player == null) return;
+    public void handleClient() {
+        Minecraft client = Minecraft.getInstance();
+        if (client.player == null) return;
 
         if (client.player.containerMenu instanceof PostboxScreenHandler container) {
-                container.names = names;
-                container.ticks = ticks;
-            }
+            container.names = names;
+            container.ticks = ticks;
+        }
     }
 
     public static AddresseeDataMessage create(List<String> names, List<Integer> ticks) {
         return new AddresseeDataMessage(names, ticks);
+    }
+
+    public void sendTo(ServerPlayer player) {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        this.encode(buf);
+        NetworkManager.sendToPlayer(player, ID, buf);
+    }
+
+    public static void registerS2C() {
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, ID, (buf, ctx) -> {
+            AddresseeDataMessage msg = decode(buf);
+            Minecraft mc = Minecraft.getInstance();
+            mc.execute(msg::handleClient);
+        });
     }
 }

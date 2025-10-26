@@ -1,6 +1,5 @@
 package com.flechazo.contact.fabric.client;
 
-import com.flechazo.contact.client.ClientProxy;
 import com.flechazo.contact.client.gui.tooltip.PackageTooltipComponent;
 import com.flechazo.contact.client.item.PackageTooltipData;
 import com.flechazo.contact.client.renderer.MailboxTileEntityRenderer;
@@ -9,10 +8,7 @@ import com.flechazo.contact.common.config.ContactClientConfig;
 import com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry;
 import com.flechazo.contact.common.tileentity.BlockEntityTypeRegistry;
 import com.flechazo.contact.fabric.network.VersionCheckHandler;
-import com.flechazo.contact.network.ActionMessage;
-import com.flechazo.contact.network.AddresseeDataMessage;
 import com.iafenvoy.jupiter.ConfigManager;
-import com.mafuyu404.oelib.fabric.network.NetworkManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
@@ -31,8 +27,6 @@ public final class ContactFabricClient implements ClientModInitializer, ModelLoa
         BlockColorsRegistry.init();
         ItemColorsRegistry.init();
         BlockRegistry.registerRenderLayer();
-        NetworkManager.registerClientPacket(AddresseeDataMessage.class);
-        NetworkManager.registerClientPacket(ActionMessage.class);
         VersionCheckHandler.registerClientMessage();
         registerTooltipComponents();
     }

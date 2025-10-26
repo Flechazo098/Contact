@@ -1,19 +1,20 @@
 package com.flechazo.contact.network;
 
+import com.flechazo.contact.Contact;
 import com.flechazo.contact.client.ClientProxy;
 import com.flechazo.contact.common.screenhandler.PackageScreenHandler;
 import com.flechazo.contact.common.screenhandler.PostboxScreenHandler;
 import com.flechazo.contact.common.screenhandler.RedPacketEnvelopeScreenHandler;
-import com.mafuyu404.oelib.api.net.INetworkContext;
-import com.mafuyu404.oelib.api.net.NetworkPacket;
-import com.mafuyu404.oelib.api.net.Side;
-import com.mafuyu404.oelib.api.net.SimplePacket;
+import dev.architectury.networking.NetworkManager;
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
-@NetworkPacket(side = Side.BOTH)
-public class ActionMessage extends SimplePacket<ActionMessage> {
+public class ActionMessage {
+    private static final ResourceLocation ID = new ResourceLocation(Contact.MOD_ID, "action");
+
     private final int action;
     private final String extra;
 
@@ -22,22 +23,24 @@ public class ActionMessage extends SimplePacket<ActionMessage> {
         this.extra = extra;
     }
 
-    @Override
     public void encode(FriendlyByteBuf buf) {
         buf.writeInt(action);
         buf.writeUtf(extra != null ? extra : "", 32767);
     }
 
     public static ActionMessage decode(FriendlyByteBuf buf) {
-        int action = buf.readInt();
-        String extra = buf.readUtf(32767);
-        return new ActionMessage(action, extra.isEmpty() ? null : extra);
+        try {
+            int action = buf.readInt();
+            String extra = buf.readUtf(32767);
+            return new ActionMessage(action, extra.isEmpty() ? null : extra);
+        } catch (Exception e) {
+            Contact.error("[ActionMessage/decode] Failed to decode, buf readableBytes=" + buf.readableBytes(), e);
+            throw e;
+        }
     }
 
-    @Override
-    protected void handleClient(INetworkContext context) {
-        Minecraft client = getClient(context);
-        if (client == null) return;
+    public void handleClient() {
+        Minecraft client = Minecraft.getInstance();
 
         if (action == 0) {
             ClientProxy.notifyNewMail(client);
@@ -48,13 +51,8 @@ public class ActionMessage extends SimplePacket<ActionMessage> {
         }
     }
 
-    @Override
-    protected void handleServer(INetworkContext context) {
-        ServerPlayer player = getSender(context);
-        if (player == null) {
-            return;
-        }
-
+    public void handleServer(ServerPlayer player) {
+        if (player == null) return;
         if (action == 0) {
             packParcel(player, extra);
         }
@@ -76,5 +74,35 @@ public class ActionMessage extends SimplePacket<ActionMessage> {
             }
             player.closeContainer();
         }
+    }
+
+    public void sendTo(ServerPlayer player) {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        this.encode(buf);
+        NetworkManager.sendToPlayer(player, ID, buf);
+    }
+
+    public void sendToServer() {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        this.encode(buf);
+        NetworkManager.sendToServer(ID, buf);
+    }
+
+    public static void registerC2S() {
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, ID, (buf, ctx) -> {
+            ActionMessage msg = decode(buf);
+            ServerPlayer player = (ServerPlayer) ctx.getPlayer();
+            if (player != null) {
+                player.server.execute(() -> msg.handleServer(player));
+            }
+        });
+    }
+
+    public static void registerS2C() {
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, ID, (buf, ctx) -> {
+            ActionMessage msg = decode(buf);
+            Minecraft mc = Minecraft.getInstance();
+            mc.execute(msg::handleClient);
+        });
     }
 }

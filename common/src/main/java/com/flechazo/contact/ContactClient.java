@@ -3,6 +3,8 @@ package com.flechazo.contact;
 import com.flechazo.contact.common.block.BlockRegistry;
 import com.flechazo.contact.common.config.ContactClientConfig;
 import com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry;
+import com.flechazo.contact.network.ActionMessage;
+import com.flechazo.contact.network.AddresseeDataMessage;
 import com.iafenvoy.jupiter.ConfigManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,5 +15,8 @@ public class ContactClient {
         ConfigManager.getInstance().registerConfigHandler(ContactClientConfig.INSTANCE);
         ScreenHandlerTypeRegistry.registerContainers();
         BlockRegistry.registerRenderLayer();
+
+        ActionMessage.registerS2C();
+        AddresseeDataMessage.registerS2C();
     }
 }

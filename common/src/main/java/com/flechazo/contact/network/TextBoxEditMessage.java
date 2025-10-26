@@ -1,16 +1,17 @@
 package com.flechazo.contact.network;
 
-import com.mafuyu404.oelib.api.net.INetworkContext;
-import com.mafuyu404.oelib.api.net.NetworkPacket;
-import com.mafuyu404.oelib.api.net.Side;
-import com.mafuyu404.oelib.api.net.SimplePacket;
+import com.flechazo.contact.Contact;
+import dev.architectury.networking.NetworkManager;
+import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
-@NetworkPacket(side = Side.SERVER)
-public class TextBoxEditMessage extends SimplePacket<TextBoxEditMessage> {
+public class TextBoxEditMessage {
+    private static final ResourceLocation ID = new ResourceLocation(Contact.MOD_ID, "textbox_edit");
+
     private final ItemStack item;
     private final int held;
 
@@ -19,7 +20,6 @@ public class TextBoxEditMessage extends SimplePacket<TextBoxEditMessage> {
         this.held = held;
     }
 
-    @Override
     public void encode(FriendlyByteBuf buf) {
         buf.writeItem(item);
         buf.writeInt(held);
@@ -31,9 +31,7 @@ public class TextBoxEditMessage extends SimplePacket<TextBoxEditMessage> {
         return new TextBoxEditMessage(item, held);
     }
 
-    @Override
-    protected void handleServer(INetworkContext context) {
-        ServerPlayer player = getSender(context);
+    public void handleServer(ServerPlayer player) {
         if (player == null) {
             return;
         }
@@ -48,5 +46,21 @@ public class TextBoxEditMessage extends SimplePacket<TextBoxEditMessage> {
 
     public static TextBoxEditMessage create(ItemStack item, int held) {
         return new TextBoxEditMessage(item, held);
+    }
+
+    public void sendToServer() {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        this.encode(buf);
+        NetworkManager.sendToServer(ID, buf);
+    }
+
+    public static void registerC2S() {
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, ID, (buf, ctx) -> {
+            TextBoxEditMessage msg = decode(buf);
+            ServerPlayer player = (ServerPlayer) ctx.getPlayer();
+            if (player != null) {
+                player.server.execute(() -> msg.handleServer(player));
+            }
+        });
     }
 }

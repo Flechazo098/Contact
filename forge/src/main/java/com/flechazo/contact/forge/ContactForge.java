@@ -1,15 +1,11 @@
 package com.flechazo.contact.forge;
 
 import com.flechazo.contact.Contact;
-import com.flechazo.contact.forge.network.VersionCheckHandler;
-import com.flechazo.contact.network.*;
 import com.flechazo.contact.resourse.PostcardDataManager;
 import com.flechazo.contact.resourse.PostcardStyle;
-import com.mafuyu404.oelib.api.net.NetworkManager;
 import com.mafuyu404.oelib.forge.data.DataRegistry;
 import dev.architectury.platform.forge.EventBuses;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(Contact.MOD_ID)
@@ -19,11 +15,5 @@ public final class ContactForge {
         DataRegistry.register(PostcardStyle.class);
         PostcardDataManager.initialize();
         Contact.init();
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
-    }
-
-    public void commonSetup(FMLCommonSetupEvent event) {
-        NetworkManager.registerPackets(ActionMessage.class,AddresseeDataMessage.class, EnquireAddresseeMessage.class, PostcardEditMessage.class, TextBoxEditMessage.class);
-        VersionCheckHandler.register();
     }
 }

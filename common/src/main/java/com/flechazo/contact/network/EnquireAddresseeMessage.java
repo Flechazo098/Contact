@@ -1,5 +1,6 @@
 package com.flechazo.contact.network;
 
+import com.flechazo.contact.Contact;
 import com.flechazo.contact.common.config.ContactCommonConfig;
 import com.flechazo.contact.common.handler.AdvancementManager;
 import com.flechazo.contact.common.handler.MailboxManager;
@@ -9,10 +10,8 @@ import com.flechazo.contact.common.screenhandler.PostboxScreenHandler;
 import com.flechazo.contact.common.storage.IMailboxDataProvider;
 import com.flechazo.contact.common.storage.MailToBeSent;
 import com.flechazo.contact.common.storage.MailboxDataManager;
-import com.mafuyu404.oelib.api.net.INetworkContext;
-import com.mafuyu404.oelib.api.net.NetworkPacket;
-import com.mafuyu404.oelib.api.net.Side;
-import com.mafuyu404.oelib.api.net.SimplePacket;
+import dev.architectury.networking.NetworkManager;
+import io.netty.buffer.Unpooled;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -22,8 +21,9 @@ import net.minecraft.world.level.Level;
 
 import java.util.*;
 
-@NetworkPacket(side = Side.SERVER)
-public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessage> {
+public class EnquireAddresseeMessage {
+    private static final ResourceLocation ID = new ResourceLocation(Contact.MOD_ID, "enquire_addressee");
+
     private final String nameIn;
     private final boolean shouldSend;
 
@@ -32,7 +32,6 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
         this.shouldSend = shouldSend;
     }
 
-    @Override
     public void encode(FriendlyByteBuf buf) {
         buf.writeUtf(nameIn, 32767);
         buf.writeBoolean(shouldSend);
@@ -44,9 +43,7 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
         return new EnquireAddresseeMessage(name, shouldSend);
     }
 
-    @Override
-    protected void handleServer(INetworkContext context) {
-        ServerPlayer player = getSender(context);
+    public void handleServer(ServerPlayer player) {
         if (player == null || nameIn.isEmpty()) {
             return;
         }
@@ -172,5 +169,21 @@ public class EnquireAddresseeMessage extends SimplePacket<EnquireAddresseeMessag
 
     public static EnquireAddresseeMessage create(String name, boolean shouldSend) {
         return new EnquireAddresseeMessage(name, shouldSend);
+    }
+
+    public void sendToServer() {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        this.encode(buf);
+        NetworkManager.sendToServer(ID, buf);
+    }
+
+    public static void registerC2S() {
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, ID, (buf, ctx) -> {
+            EnquireAddresseeMessage msg = decode(buf);
+            ServerPlayer player = (ServerPlayer) ctx.getPlayer();
+            if (player != null) {
+                player.server.execute(() -> msg.handleServer(player));
+            }
+        });
     }
 }

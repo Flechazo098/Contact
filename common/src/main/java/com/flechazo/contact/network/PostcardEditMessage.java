@@ -1,17 +1,18 @@
 package com.flechazo.contact.network;
 
+import com.flechazo.contact.Contact;
 import com.flechazo.contact.common.item.PostcardItem;
-import com.mafuyu404.oelib.api.net.INetworkContext;
-import com.mafuyu404.oelib.api.net.NetworkPacket;
-import com.mafuyu404.oelib.api.net.Side;
-import com.mafuyu404.oelib.api.net.SimplePacket;
+import dev.architectury.networking.NetworkManager;
+import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
-@NetworkPacket(side = Side.SERVER)
-public class PostcardEditMessage extends SimplePacket<PostcardEditMessage> {
+public class PostcardEditMessage {
+    private static final ResourceLocation ID = new ResourceLocation(Contact.MOD_ID, "postcard_edit");
+
     private final ItemStack postcard;
     private final int held;
 
@@ -20,7 +21,6 @@ public class PostcardEditMessage extends SimplePacket<PostcardEditMessage> {
         this.held = held;
     }
 
-    @Override
     public void encode(FriendlyByteBuf buf) {
         buf.writeItem(postcard);
         buf.writeInt(held);
@@ -32,9 +32,7 @@ public class PostcardEditMessage extends SimplePacket<PostcardEditMessage> {
         return new PostcardEditMessage(postcard, held);
     }
 
-    @Override
-    protected void handleServer(INetworkContext context) {
-        ServerPlayer player = getSender(context);
+    public void handleServer(ServerPlayer player) {
         if (player == null) {
             return;
         }
@@ -51,5 +49,21 @@ public class PostcardEditMessage extends SimplePacket<PostcardEditMessage> {
 
     public static PostcardEditMessage create(ItemStack postcard, int held) {
         return new PostcardEditMessage(postcard, held);
+    }
+
+    public void sendToServer() {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        this.encode(buf);
+        NetworkManager.sendToServer(ID, buf);
+    }
+
+    public static void registerC2S() {
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, ID, (buf, ctx) -> {
+            PostcardEditMessage msg = decode(buf);
+            ServerPlayer player = (ServerPlayer) ctx.getPlayer();
+            if (player != null) {
+                player.server.execute(() -> msg.handleServer(player));
+            }
+        });
     }
 }

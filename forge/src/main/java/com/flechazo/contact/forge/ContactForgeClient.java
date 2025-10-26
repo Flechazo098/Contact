@@ -2,7 +2,6 @@ package com.flechazo.contact.forge;
 
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.ContactClient;
-import com.flechazo.contact.client.ClientProxy;
 import com.flechazo.contact.client.color.block.MailboxBlockColor;
 import com.flechazo.contact.client.color.item.MailboxItemColor;
 import com.flechazo.contact.client.gui.tooltip.PackageTooltipComponent;
@@ -11,14 +10,10 @@ import com.flechazo.contact.client.renderer.MailboxTileEntityRenderer;
 import com.flechazo.contact.client.renderer.PostcardEntityRenderer;
 import com.flechazo.contact.common.entity.EntityTypeRegistry;
 import com.flechazo.contact.common.tileentity.BlockEntityTypeRegistry;
-import com.flechazo.contact.network.ActionMessage;
-import com.flechazo.contact.network.AddresseeDataMessage;
-import com.mafuyu404.oelib.api.net.NetworkManager;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ModelEvent;
@@ -52,7 +47,6 @@ public class ContactForgeClient {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
             BlockEntityRenderers.register(BlockEntityTypeRegistry.MAILBOX_BLOCK_ENTITY.get(), MailboxTileEntityRenderer::new);
-            NetworkManager.registerPackets(ActionMessage.class, AddresseeDataMessage.class);
             ContactClient.onInitializeClient();
     }
 
