@@ -26,7 +26,7 @@ public class WrappingPaperItem extends NormalItem {
         ItemStack itemStack = user.getItemInHand(hand);
         if (!world.isClientSide) {
             if (user instanceof ServerPlayer sp) {
-                boolean isEnder = itemStack.getItem() == ItemRegistry.ENDER_WRAPPING_PAPER;
+                boolean isEnder = itemStack.getItem() == ItemRegistry.ENDER_WRAPPING_PAPER.get();
                 MenuRegistry.openExtendedMenu(sp,
                         getContainer(isEnder),
                         buf -> buf.writeBoolean(isEnder)
