@@ -37,7 +37,7 @@ side = "BOTH"
 [[dependencies.contact]]
 modId = "oelib"
 mandatory = true
-versionRange = "[0.0.4-beta,)"
+versionRange = "[0.0.5,)"
 ordering = "AFTER"
 side = "BOTH"
 
