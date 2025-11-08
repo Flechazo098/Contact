@@ -125,7 +125,7 @@ public class MailboxBlock extends DoubleHorizontalBlock implements EntityBlock, 
                         if (parcel.getItem() instanceof PostcardItem) {
                             AdvancementManager.givePlayerAdvancement(level.getServer(), (ServerPlayer) player, new ResourceLocation("contact:receive_postcard"));
                         }
-                        if (parcel.getOrCreateTag().contains("AnotherLevel")) {
+                        if (parcel.getOrCreateTag().contains("AnotherWorld")) {
                             AdvancementManager.givePlayerAdvancement(level.getServer(), (ServerPlayer) player, new ResourceLocation("contact:from_another_world"));
                         }
 

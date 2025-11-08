@@ -8,6 +8,8 @@ import com.flechazo.contact.common.config.ContactClientConfig;
 import com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry;
 import com.flechazo.contact.common.tileentity.BlockEntityTypeRegistry;
 import com.flechazo.contact.fabric.network.VersionCheckHandler;
+import com.flechazo.contact.network.ActionMessage;
+import com.flechazo.contact.network.AddresseeDataMessage;
 import com.iafenvoy.jupiter.ConfigManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -20,6 +22,8 @@ public final class ContactFabricClient implements ClientModInitializer, ModelLoa
     @Override
     public void onInitializeClient() {
         ConfigManager.getInstance().registerConfigHandler(ContactClientConfig.INSTANCE);
+        ActionMessage.registerS2C();
+        AddresseeDataMessage.registerS2C();
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
             ScreenHandlerTypeRegistry.registerContainers();
         });

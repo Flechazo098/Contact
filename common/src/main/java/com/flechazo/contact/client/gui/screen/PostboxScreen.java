@@ -139,7 +139,6 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
 
             int z = 5000;
             if (size != 0) {
-                System.out.println(isRed);
                 ResourceLocation texture = isRed ? RED_TEXTURE : GREEN_TEXTURE;
 //                RenderSystem.setShaderTexture(0, texture);
                 int renderWidth = maxWidth;

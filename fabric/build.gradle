@@ -30,7 +30,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 
     modImplementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
-    modImplementation "curse.maven:oelib-1319210:6875022"
+    modImplementation "curse.maven:oelib-1319210:7060452"
     modImplementation   "curse.maven:jupiter-1072905:6843040"
 
     // Replace modImplementation with modApi if you expose components in your own API
