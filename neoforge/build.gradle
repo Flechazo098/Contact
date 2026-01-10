@@ -61,3 +61,18 @@ shadowJar {
 remapJar {
     input.set shadowJar.archiveFile
 }
+
+publishing {
+    publications {
+        mavenNeoForge(MavenPublication) {
+            artifactId = base.archivesName.get()
+            artifact(remapJar) {
+                builtBy tasks.remapJar
+                classifier null
+            }
+            artifact(tasks.sourcesJar) {
+                classifier "sources"
+            }
+        }
+    }
+}
