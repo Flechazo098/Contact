@@ -36,21 +36,18 @@ import java.util.List;
 public class EditableTextBox extends AbstractWidget {
     private final Minecraft mc;
     private final Font font;
-
-    private boolean isModified = false;
-    private int updateCount = 0;
-    private long lastClickTime = 0;
     private final int color;
     private final int spacing;
-
     private final TextFieldHelper textInputUtil;
-    @Nullable
-    private Page currentPage = null;
-    private String page = "";
-
     private final ItemStack item;
     private final Player editingPlayer;
     private final InteractionHand hand;
+    private boolean isModified = false;
+    private int updateCount = 0;
+    private long lastClickTime = 0;
+    @Nullable
+    private Page currentPage = null;
+    private String page = "";
 
     public EditableTextBox(ItemStack item, Player playerIn, InteractionHand handIn, int x, int y, int boxWidth, int boxHeight, int spacingPixel, int color, Component title) {
         super(x, y, boxWidth, boxHeight, title);
@@ -68,6 +65,11 @@ public class EditableTextBox extends AbstractWidget {
         this.textInputUtil = new TextFieldHelper(() -> page, this::setText, this::getClipboardText, this::setClipboardText, (text1) -> text1.length() < 1024 && this.font.wordWrapHeight(text1, boxWidth) <= boxHeight * font.lineHeight / spacingPixel);
     }
 
+    private static int getCursorLine(int[] linesLength, int cursorPos) {
+        int i = Arrays.binarySearch(linesLength, cursorPos);
+        return i < 0 ? -(i + 2) : i;
+    }
+
     // Please link to Screen
     public void tick() {
         ++this.updateCount;
@@ -77,7 +79,7 @@ public class EditableTextBox extends AbstractWidget {
         if (this.isModified) {
             this.item.set(ContactDataComponents.POSTCARD_TEXT.get(), this.page);
             int i = this.hand == InteractionHand.MAIN_HAND ? this.editingPlayer.getInventory().selected : 40;
-            PostcardEditMessage packet = PostcardEditMessage.create(item, i);
+            PostcardEditMessage packet = new PostcardEditMessage(item, i);
             packet.sendToServer();
         }
     }
@@ -92,15 +94,15 @@ public class EditableTextBox extends AbstractWidget {
             List<Line> lines = Lists.newArrayList();
             MutableInt mutableint = new MutableInt();
             MutableBoolean mutableboolean = new MutableBoolean();
-            StringSplitter stringSplitter = this.font.getSplitter();
+            var stringSplitter = this.font.getSplitter();
             stringSplitter.splitLines(page, width, Style.EMPTY, true, (style, lineStartPos, lineEndPos) ->
             {
                 int lineCount = mutableint.getAndIncrement();
-                String lineTextRaw = page.substring(lineStartPos, lineEndPos);
+                var lineTextRaw = page.substring(lineStartPos, lineEndPos);
                 mutableboolean.setValue(lineTextRaw.endsWith("\n"));
-                String lineText = StringUtils.stripEnd(lineTextRaw, " \n");
+                var lineText = StringUtils.stripEnd(lineTextRaw, " \n");
                 int y = lineCount * spacing;
-                Point point = this.getPointPosInScreen(new Point(0, y));
+                var point = this.getPointPosInScreen(new Point(0, y));
                 intlist.add(lineStartPos);
                 lines.add(new Line(style, lineText, point.x, point.y));
             });
@@ -130,7 +132,7 @@ public class EditableTextBox extends AbstractWidget {
 
                     for (int j3 = selectionStartLine + 1; j3 < selectionEndLine; ++j3) {
                         int j2 = j3 * spacing;
-                        String s1 = page.substring(linesStartPos[j3], linesStartPos[j3 + 1]);
+                        var s1 = page.substring(linesStartPos[j3], linesStartPos[j3 + 1]);
                         int k2 = (int) stringSplitter.stringWidth(s1);
                         rectangleList.add(this.getRectangle(new Point(0, j2), new Point(k2, j2 + 9)));
                     }
@@ -144,16 +146,16 @@ public class EditableTextBox extends AbstractWidget {
     }
 
     private Rect2i getRectangle(String text, StringSplitter characterManager, int from, int to, int lineStart, int lineEnd) {
-        String s = text.substring(lineEnd, from);
-        String s1 = text.substring(lineEnd, to);
+        var s = text.substring(lineEnd, from);
+        var s1 = text.substring(lineEnd, to);
         Point pointFrom = new Point((int) characterManager.stringWidth(s), lineStart);
         Point pointTo = new Point((int) characterManager.stringWidth(s1), lineStart + spacing);
         return this.getRectangle(pointFrom, pointTo);
     }
 
     private Rect2i getRectangle(Point pointFromIn, Point pointToIn) {
-        Point pointFrom = this.getPointPosInScreen(pointFromIn);
-        Point pointTo = this.getPointPosInScreen(pointToIn);
+        var pointFrom = this.getPointPosInScreen(pointFromIn);
+        var pointTo = this.getPointPosInScreen(pointToIn);
         int i = Math.min(pointFrom.x, pointTo.x);
         int j = Math.max(pointFrom.x, pointTo.x);
         int k = Math.min(pointFrom.y, pointTo.y);
@@ -200,11 +202,6 @@ public class EditableTextBox extends AbstractWidget {
         int i = this.textInputUtil.getCursorPos();
         int j = this.getPage().getLineToMove(i, lineAdded);
         this.textInputUtil.setCursorPos(j, Screen.hasShiftDown());
-    }
-
-    private static int getCursorLine(int[] linesLength, int cursorPos) {
-        int i = Arrays.binarySearch(linesLength, cursorPos);
-        return i < 0 ? -(i + 2) : i;
     }
 
     private void moveToLineHead() {
@@ -315,7 +312,7 @@ public class EditableTextBox extends AbstractWidget {
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        Page page = this.getPage();
+        var page = this.getPage();
 
         for (Line line : page.lines) {
             guiGraphics.drawString(this.font, line.lineTextComponent, line.x, line.y, color, false);
@@ -331,7 +328,7 @@ public class EditableTextBox extends AbstractWidget {
             return;
         }
 
-        Tesselator tesselator = Tesselator.getInstance();
+        var tesselator = Tesselator.getInstance();
         RenderSystem.setShader(GameRenderer::getPositionShader);
         RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
         RenderSystem.enableColorLogicOp();
@@ -419,11 +416,11 @@ public class EditableTextBox extends AbstractWidget {
 
     static class Page {
         protected static final Page EMPTY = new Page("", new Point(0, 0), true, new int[]{0}, new Line[]{new Line(Style.EMPTY, "", 0, 0)}, new Rect2i[0]);
+        protected final Line[] lines;
         private final String text;
         private final Point point;
         private final boolean isInsert;
         private final int[] linesStartPos;
-        protected final Line[] lines;
         private final Rect2i[] selection;
 
         public Page(String text, Point point, boolean isInsert, int[] linesStartPos, Line[] lines, Rect2i[] selection) {
@@ -474,11 +471,11 @@ public class EditableTextBox extends AbstractWidget {
     }
 
     static class Line {
-        private final Style style;
-        private final String lineText;
         protected final Component lineTextComponent;
         protected final int x;
         protected final int y;
+        private final Style style;
+        private final String lineText;
 
         public Line(Style style, String text, int x, int y) {
             this.style = style;

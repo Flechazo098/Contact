@@ -5,7 +5,7 @@ import com.flechazo.contact.client.gui.hud.TexturePos;
 import com.flechazo.contact.client.widget.IconButton;
 import com.flechazo.contact.common.screenhandler.RedPacketEnvelopeScreenHandler;
 import com.flechazo.contact.helper.GuiHelper;
-import com.flechazo.contact.network.ActionC2SMessage;
+import com.flechazo.contact.network.ActionMessage;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
@@ -53,7 +53,8 @@ public class RedPacketEnvelopeScreen extends AbstractContainerScreen<RedPacketEn
     }
 
     private void seal() {
-        ActionC2SMessage packet = ActionC2SMessage.create(0, menu.blessings);
+        var blessings = menu.blessings == null ? "" : menu.blessings;
+        ActionMessage packet = new ActionMessage(0, blessings);
         packet.sendToServer();
     }
 

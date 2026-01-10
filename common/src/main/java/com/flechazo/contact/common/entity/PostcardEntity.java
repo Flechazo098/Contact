@@ -18,7 +18,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
@@ -37,9 +39,9 @@ import static com.flechazo.contact.common.entity.EntityTypeRegistry.POSTCARD;
 public class PostcardEntity extends HangingEntity {
     private static final EntityDataAccessor<ItemStack> ITEM_STACK = SynchedEntityData.defineId(PostcardEntity.class, EntityDataSerializers.ITEM_STACK);
     private static final EntityDataAccessor<Integer> ROTATION = SynchedEntityData.defineId(PostcardEntity.class, EntityDataSerializers.INT);
-    private boolean fixed;
     private static final double WIDTH = 12.0;
     private static final double HEIGHT = 12.0;
+    private boolean fixed;
 
     public PostcardEntity(EntityType<? extends HangingEntity> entityType, Level level) {
         super(entityType, level);

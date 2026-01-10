@@ -1,21 +1,14 @@
 package com.flechazo.contact.helper;
 
 import com.flechazo.contact.client.gui.hud.TexturePos;
-import com.flechazo.contact.client.widget.IconButton;
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Transformation;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.joml.Matrix4f;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,18 +18,14 @@ public final class GuiHelper {
         final float uScale = 1f / 0x100;
         final float vScale = 1f / 0x100;
 
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder wr = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        Matrix4f matrix = poseStack.last().pose();
+        var tesselator = Tesselator.getInstance();
+        var wr = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        var matrix = poseStack.last().pose();
         wr.addVertex(matrix, x, y + height, zLevel).setUv(u * uScale, ((v + height) * vScale));
         wr.addVertex(matrix, x + width, y + height, zLevel).setUv((u + width) * uScale, ((v + height) * vScale));
         wr.addVertex(matrix, x + width, y, zLevel).setUv((u + width) * uScale, (v * vScale));
         wr.addVertex(matrix, x, y, zLevel).setUv(u * uScale, (v * vScale));
         BufferUploader.drawWithShader(wr.buildOrThrow());
-    }
-
-    public static void drawLayer(PoseStack poseStack, int x, int y, TexturePos pos, int z) {
-        drawTexturedModalRect(poseStack, x, y, pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), z);
     }
 
     public static void drawLayer(PoseStack poseStack, int x, int y, TexturePos pos) {
@@ -49,30 +38,6 @@ public final class GuiHelper {
 
     public static void drawLayerBySize(GuiGraphics guiGraphics, ResourceLocation rl, int x, int y, TexturePos pos, int textureWidth, int textureHeight) {
         guiGraphics.blit(rl, x, y, pos.getWidth(), pos.getHeight(), pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), textureWidth, textureHeight);
-    }
-
-    public static void drawLayerBySize(GuiGraphics guiGraphics, ResourceLocation rl, int x, int y, TexturePos pos) {
-        drawLayerBySize(guiGraphics, rl, x, y, pos, pos.getWidth(), pos.getHeight());
-    }
-
-    public static void renderIconButton(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY, int z, ResourceLocation texture, IconButton button, TexturePos normalPos, TexturePos hoveredPos, TexturePos pressedPos) {
-        RenderSystem.enableBlend();
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, texture);
-        if (button.isPressed()) {
-            GuiHelper.drawLayer(guiGraphics.pose(), button.getX(), button.getY(), pressedPos);
-            RenderSystem.disableBlend();
-            return;
-        } else if (button.isHovered()) {
-            GuiHelper.drawLayer(guiGraphics.pose(), button.getX(), button.getY(), hoveredPos);
-            RenderSystem.disableBlend();
-            return;
-        }
-
-        GuiHelper.drawLayer(guiGraphics.pose(), button.getX(), button.getY(), normalPos);
-        RenderSystem.disableBlend();
-
-        button.render(guiGraphics, mouseX, mouseY, partialTicks);
     }
 
     public static void renderButton(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY, int z, ResourceLocation texture, Button button, TexturePos normalPos, TexturePos hoveredPos) {

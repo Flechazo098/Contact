@@ -2,16 +2,15 @@ package com.flechazo.contact.common.screenhandler;
 
 import com.flechazo.contact.common.config.ContactCommonConfig;
 import com.flechazo.contact.common.item.IPackageItem;
-import com.flechazo.contact.common.item.ItemRegistry;
+import com.flechazo.contact.common.registry.ItemRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-import static com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry.ENVELOPE_CONTAINER;
+import static com.flechazo.contact.common.registry.ScreenHandlerTypeRegistry.ENVELOPE_CONTAINER;
 
 public class EnvelopeScreenHandler extends PackageScreenHandler {
     public final static int CONTENT_COUNT = 1;
@@ -24,7 +23,7 @@ public class EnvelopeScreenHandler extends PackageScreenHandler {
             public boolean mayPlace(ItemStack stack) {
                 if (stack.getItem() instanceof IPackageItem)
                     return false;
-                ResourceLocation rl = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                var rl = BuiltInRegistries.ITEM.getKey(stack.getItem());
                 return !ContactCommonConfig.getBlacklistID().contains(rl.toString()) && !ContactCommonConfig.getBlacklistID().contains(rl.getPath());
             }
         });

@@ -1,12 +1,12 @@
 package com.flechazo.contact.fabric.data;
 
-import com.flechazo.contact.common.storage.IMailboxDataProvider;
 import com.flechazo.contact.common.storage.MailToBeSent;
 import com.flechazo.contact.common.storage.PlayerMailboxData;
+import com.flechazo.contact.platform.IMailboxDataProvider;
+import cc.sighs.oelib.data.DataManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -16,14 +16,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public record FabricMailboxDataProvider(ServerLevel level) implements IMailboxDataProvider {
+public class FabricMailboxDataProvider implements IMailboxDataProvider {
 
     private MailboxSavedData getSavedData() {
-        return MailboxSavedData.get(level);
+        var server = DataManager.getServer();
+        var overworld = server.getLevel(Level.OVERWORLD);
+        return MailboxSavedData.get(overworld);
     }
 
     private PlayerMailboxData getData() {
         return getSavedData().getData();
+    }
+
+    public FabricMailboxDataProvider() {
     }
 
     @Override

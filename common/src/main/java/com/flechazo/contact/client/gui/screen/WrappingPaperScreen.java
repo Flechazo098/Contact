@@ -5,7 +5,7 @@ import com.flechazo.contact.client.gui.hud.TexturePos;
 import com.flechazo.contact.client.widget.IconButton;
 import com.flechazo.contact.common.screenhandler.WrappingPaperScreenHandler;
 import com.flechazo.contact.helper.GuiHelper;
-import com.flechazo.contact.network.ActionC2SMessage;
+import com.flechazo.contact.network.ActionMessage;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
@@ -42,7 +42,7 @@ public class WrappingPaperScreen extends AbstractContainerScreen<WrappingPaperSc
     }
 
     private void pack() {
-        ActionC2SMessage packet = ActionC2SMessage.create(0);
+        ActionMessage packet = new ActionMessage(0, "");
         packet.sendToServer();
     }
 

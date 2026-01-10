@@ -19,9 +19,13 @@ public class EnvelopeItem extends NormalItem {
         super(ResourceLocation.fromNamespaceAndPath(Contact.MOD_ID, "envelope"), Contact.ITEM_GROUP);
     }
 
+    public static MenuProvider getContainer() {
+        return new SimpleMenuProvider((id, inventory, player) -> new EnvelopeScreenHandler(id, inventory), CONTAINER_NAME);
+    }
+
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player user, InteractionHand hand) {
-        ItemStack itemStack = user.getItemInHand(hand);
+        var itemStack = user.getItemInHand(hand);
         if (!level.isClientSide) {
             user.openMenu(getContainer());
             if (!user.getAbilities().instabuild) {
@@ -29,9 +33,5 @@ public class EnvelopeItem extends NormalItem {
             }
         }
         return InteractionResultHolder.consume(itemStack);
-    }
-
-    public static MenuProvider getContainer() {
-        return new SimpleMenuProvider((id, inventory, player) -> new EnvelopeScreenHandler(id, inventory), CONTAINER_NAME);
     }
 }

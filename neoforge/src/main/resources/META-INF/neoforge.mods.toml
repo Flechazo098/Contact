@@ -27,23 +27,9 @@ ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.contact]]
-modId = "architectury"
-mandatory = true
-versionRange = "[9.2.14,)"
-ordering = "AFTER"
-side = "BOTH"
-
-[[dependencies.contact]]
 modId = "oelib"
 mandatory = true
-versionRange = "[0.0.4-beta,)"
+versionRange = "[0.0.7-beta,)"
 ordering = "AFTER"
-side = "BOTH"
-
-[[dependencies.contact]]
-modId = "jupiter"
-mandatory = true
-versionRange = "[2.0, )"
-ordering = "NONE"
 side = "BOTH"
 

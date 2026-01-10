@@ -1,8 +1,8 @@
 package com.flechazo.contact.common.storage;
 
+import cc.sighs.oelib.data.DataManager;
 import com.flechazo.contact.common.tileentity.MailboxBlockEntity;
-import com.flechazo.contact.network.ActionS2CMessage;
-import com.flechazo.contact.platform.PlatformHelper;
+import com.flechazo.contact.network.ActionMessage;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.core.BlockPos;
@@ -16,11 +16,9 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,27 +28,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class PlayerMailboxData {
-    public final Map<String, UUID> nameToUUID = Maps.newTreeMap();
-    public final Map<UUID, SimpleContainer> uuidToContents = Maps.newHashMap();
-    private final Map<UUID, GlobalPos> uuidToLocation = Maps.newHashMap();
-    private final Map<GlobalPos, UUID> locationToPlayer = Maps.newHashMap();
-
-    public final List<MailToBeSent> mailList = Lists.newArrayList();
-
-
-    public CompoundTag serializeForAttachment(HolderLookup.Provider provider) {
-        CompoundTag tag = new CompoundTag();
-        writeToNBT(tag, provider);
-        return tag;
-    }
-
-    public static PlayerMailboxData deserializeForAttachment(CompoundTag tag, HolderLookup.Provider provider) {
-        PlayerMailboxData data = new PlayerMailboxData();
-        data.readFromNBT(tag, provider);
-        return data;
-    }
-
-
     public static final StreamCodec<RegistryFriendlyByteBuf, PlayerMailboxData> STREAM_CODEC = StreamCodec.of(
             (buf, data) -> {
                 CompoundTag tag = new CompoundTag();
@@ -65,26 +42,43 @@ public class PlayerMailboxData {
             },
             (buf) -> {
                 PlayerMailboxData data = new PlayerMailboxData();
-                CompoundTag tag = ByteBufCodecs.COMPOUND_TAG.decode(buf);
+                var tag = ByteBufCodecs.COMPOUND_TAG.decode(buf);
                 data.readFromNBT(tag, buf.registryAccess());
 
                 int nameMapSize = buf.readInt();
                 for (int i = 0; i < nameMapSize; i++) {
-                    String name = ByteBufCodecs.STRING_UTF8.decode(buf);
-                    String uuidStr = ByteBufCodecs.STRING_UTF8.decode(buf);
+                    var name = ByteBufCodecs.STRING_UTF8.decode(buf);
+                    var uuidStr = ByteBufCodecs.STRING_UTF8.decode(buf);
                     data.nameToUUID.put(name, UUID.fromString(uuidStr));
                 }
 
                 return data;
             }
     );
+    public final Map<String, UUID> nameToUUID = Maps.newTreeMap();
+    public final Map<UUID, SimpleContainer> uuidToContents = Maps.newHashMap();
+    public final List<MailToBeSent> mailList = Lists.newArrayList();
+    private final Map<UUID, GlobalPos> uuidToLocation = Maps.newHashMap();
+    private final Map<GlobalPos, UUID> locationToPlayer = Maps.newHashMap();
+
+    public static PlayerMailboxData deserializeForAttachment(CompoundTag tag, HolderLookup.Provider provider) {
+        PlayerMailboxData data = new PlayerMailboxData();
+        data.readFromNBT(tag, provider);
+        return data;
+    }
+
+    public CompoundTag serializeForAttachment(HolderLookup.Provider provider) {
+        CompoundTag tag = new CompoundTag();
+        writeToNBT(tag, provider);
+        return tag;
+    }
 
     public SimpleContainer getMailboxContents(UUID uuid) {
         return uuidToContents.getOrDefault(uuid, new SimpleContainer(24));
     }
 
     public boolean isMailboxEmpty(UUID uuid) {
-        SimpleContainer contents = uuidToContents.get(uuid);
+        var contents = uuidToContents.get(uuid);
         if (contents == null) {
             return true;
         } else {
@@ -99,7 +93,7 @@ public class PlayerMailboxData {
 
 
     public boolean isMailboxFull(UUID uuid) {
-        SimpleContainer contents = uuidToContents.get(uuid);
+        var contents = uuidToContents.get(uuid);
         if (contents == null) {
             return false;
         } else {
@@ -112,17 +106,16 @@ public class PlayerMailboxData {
         return true;
     }
 
-    // Remember to update blockstate
     public boolean addMailboxContents(UUID uuid, ItemStack parcelIn) {
-        SimpleContainer mailbox = getMailboxContents(uuid);
+        var mailbox = getMailboxContents(uuid);
         if (!isMailboxFull(uuid)) {
             for (int i = 0; i < mailbox.getContainerSize(); ++i) {
                 if (mailbox.getItem(i).isEmpty()) {
                     mailbox.setItem(i, parcelIn);
                     setMailboxContents(uuid, mailbox);
-                    ServerPlayer player = PlatformHelper.getCurrentServer().getPlayerList().getPlayer(uuid);
+                    var player = DataManager.getServer().getPlayerList().getPlayer(uuid);
                     if (player != null) {
-                        ActionS2CMessage packet = ActionS2CMessage.create(0);
+                        ActionMessage packet = new ActionMessage(0, "");
                         packet.sendTo(player);
                     }
                     return true;
@@ -132,7 +125,6 @@ public class PlayerMailboxData {
         return false;
     }
 
-    // Remember to update blockstate
     public void setMailboxContents(UUID uuid, SimpleContainer contents) {
         uuidToContents.put(uuid, contents);
     }
@@ -153,14 +145,14 @@ public class PlayerMailboxData {
 
     @SuppressWarnings("deprecation")
     public void setMailboxData(UUID uuid, ResourceKey<Level> level, BlockPos pos) {
-        GlobalPos newPos = GlobalPos.of(level, pos);
-        GlobalPos oldPos = uuidToLocation.get(uuid);
+        var newPos = GlobalPos.of(level, pos);
+        var oldPos = uuidToLocation.get(uuid);
 
         if (oldPos != null) {
             locationToPlayer.remove(oldPos);
-            Level oldLevel = PlatformHelper.getCurrentServer().getLevel(oldPos.dimension());
+            var oldLevel = DataManager.getServer().getLevel(oldPos.dimension());
             if (oldLevel != null && oldLevel.hasChunkAt(oldPos.pos())) {
-                BlockEntity oldTE = oldLevel.getBlockEntity(oldPos.pos());
+                var oldTE = oldLevel.getBlockEntity(oldPos.pos());
                 if (oldTE instanceof MailboxBlockEntity) {
                     ((MailboxBlockEntity) oldTE).refreshStatus();
                 }
@@ -169,9 +161,9 @@ public class PlayerMailboxData {
         uuidToLocation.put(uuid, newPos);
         locationToPlayer.put(newPos, uuid);
 
-        Level newWorld = PlatformHelper.getCurrentServer().getLevel(level);
+        var newWorld = DataManager.getServer().getLevel(level);
         if (newWorld != null && newWorld.hasChunkAt(newPos.pos())) {
-            BlockEntity newTE = newWorld.getBlockEntity(newPos.pos());
+            var newTE = newWorld.getBlockEntity(newPos.pos());
             if (newTE instanceof MailboxBlockEntity) {
                 ((MailboxBlockEntity) newTE).refreshStatus();
             }
@@ -179,9 +171,9 @@ public class PlayerMailboxData {
     }
 
     public void removeMailboxData(GlobalPos pos) {
-        UUID uuid = locationToPlayer.remove(pos);
+        var uuid = locationToPlayer.remove(pos);
         if (uuid != null) {
-            GlobalPos mailboxPos = uuidToLocation.get(uuid);
+            var mailboxPos = uuidToLocation.get(uuid);
             if (Objects.equals(mailboxPos, pos)) {
                 uuidToLocation.remove(uuid);
             }
@@ -199,7 +191,7 @@ public class PlayerMailboxData {
             compoundTag.putString("UUID", uuid.toString());
             compoundTag.put("Contents", uuidToContents.getOrDefault(uuid, new SimpleContainer(24)).createTag(provider));
 
-            GlobalPos globalPos = uuidToLocation.get(uuid);
+            var globalPos = uuidToLocation.get(uuid);
             if (globalPos != null) {
                 ResourceLocation.CODEC.encodeStart(NbtOps.INSTANCE, globalPos.dimension().location()).resultOrPartial(LogManager.getLogger()::error).ifPresent(world -> compoundTag.put("MailboxDimension", world));
                 compoundTag.putInt("MailboxX", globalPos.pos().getX());
@@ -225,6 +217,7 @@ public class PlayerMailboxData {
 
         return tag;
     }
+
     public void readFromNBT(CompoundTag tag, HolderLookup.Provider provider) {
         uuidToContents.clear();
         uuidToLocation.clear();
@@ -234,16 +227,16 @@ public class PlayerMailboxData {
 
         int n = tag.getInt("MapDataSize");
         for (int i = 0; i < n; i++) {
-            CompoundTag compoundTag = tag.getCompound("MapData" + i);
-            UUID uuid = UUID.fromString(compoundTag.getString("UUID"));
+            var compoundTag = tag.getCompound("MapData" + i);
+            var uuid = UUID.fromString(compoundTag.getString("UUID"));
             SimpleContainer contents = new SimpleContainer(24);
             contents.fromTag(compoundTag.getList("Contents", Tag.TAG_COMPOUND), provider);
             uuidToContents.put(uuid, contents);
 
             if (compoundTag.contains("MailboxDimension")) {
-                BlockPos mailboxPos = new BlockPos(compoundTag.getInt("MailboxX"), compoundTag.getInt("MailboxY"), compoundTag.getInt("MailboxZ"));
-                ResourceKey<Level> mailboxWorld = Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, compoundTag.get("MailboxDimension")).resultOrPartial(LogManager.getLogger()::error).orElse(Level.OVERWORLD);
-                GlobalPos globalPos = GlobalPos.of(mailboxWorld, mailboxPos);
+                var mailboxPos = new BlockPos(compoundTag.getInt("MailboxX"), compoundTag.getInt("MailboxY"), compoundTag.getInt("MailboxZ"));
+                var mailboxWorld = Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, compoundTag.get("MailboxDimension")).resultOrPartial(LogManager.getLogger()::error).orElse(Level.OVERWORLD);
+                var globalPos = GlobalPos.of(mailboxWorld, mailboxPos);
                 uuidToLocation.put(uuid, globalPos);
                 locationToPlayer.put(globalPos, uuid);
             }
@@ -251,15 +244,15 @@ public class PlayerMailboxData {
 
         n = tag.getInt("MailListSize");
         for (int i = 0; i < n; i++) {
-            CompoundTag compoundTag = tag.getCompound("MailListData" + i);
+            var compoundTag = tag.getCompound("MailListData" + i);
             MailToBeSent mail = new MailToBeSent(compoundTag, provider);
             mailList.add(mail);
         }
 
         n = tag.getInt("NameMapSize");
         for (int i = 0; i < n; i++) {
-            String name = tag.getString("NameMap" + i);
-            UUID uuid = UUID.fromString(tag.getString("NameMapUUID" + i));
+            var name = tag.getString("NameMap" + i);
+            var uuid = UUID.fromString(tag.getString("NameMapUUID" + i));
             nameToUUID.put(name, uuid);
         }
     }

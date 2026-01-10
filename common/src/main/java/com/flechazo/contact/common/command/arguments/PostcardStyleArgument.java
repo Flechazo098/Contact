@@ -18,7 +18,7 @@ public class PostcardStyleArgument extends ResourceLocationArgument {
     }
 
     public static ResourceLocation getPostcardStyleID(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
-        ResourceLocation id = context.getArgument(name, ResourceLocation.class);
+        var id = context.getArgument(name, ResourceLocation.class);
         if (PostcardDataManager.getPostcards().get(id) == null) {
             throw POSTCARD_STYLE_NOT_FOUND.create(id);
         } else {

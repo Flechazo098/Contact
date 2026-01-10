@@ -4,9 +4,9 @@ import com.flechazo.contact.client.gui.hud.TexturePos;
 import com.flechazo.contact.client.widget.ReadOnlyTextBox;
 import com.flechazo.contact.common.component.ContactDataComponents;
 import com.flechazo.contact.data.PostcardDataManager;
+import com.flechazo.contact.data.PostcardStyle;
 import com.flechazo.contact.helper.ColorHelper;
 import com.flechazo.contact.helper.GuiHelper;
-import com.flechazo.contact.data.PostcardStyle;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -15,7 +15,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 public class PostcardReadScreen extends Screen {
@@ -28,8 +27,8 @@ public class PostcardReadScreen extends Screen {
         super(Component.empty());
         this.postcard = postcardIn;
 
-        ResourceLocation styleId = postcardIn.get(ContactDataComponents.POSTCARD_STYLE_ID.get());
-            style = PostcardDataManager.getPostcards().getOrDefault(styleId, PostcardStyle.DEFAULT);
+        var styleId = postcardIn.get(ContactDataComponents.POSTCARD_STYLE_ID.get());
+        style = PostcardDataManager.getPostcards().getOrDefault(styleId, PostcardStyle.DEFAULT);
     }
 
     @Override

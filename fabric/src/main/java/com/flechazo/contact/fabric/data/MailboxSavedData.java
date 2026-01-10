@@ -19,16 +19,6 @@ public class MailboxSavedData extends SavedData {
         this.data = data;
     }
 
-    public PlayerMailboxData getData() {
-        return data;
-    }
-
-    @Override
-    public @NotNull CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
-        data.writeToNBT(tag, provider);
-        return tag;
-    }
-
     public static MailboxSavedData load(CompoundTag tag, HolderLookup.Provider provider) {
         PlayerMailboxData data = new PlayerMailboxData();
         data.readFromNBT(tag, provider);
@@ -44,6 +34,16 @@ public class MailboxSavedData extends SavedData {
                 ),
                 DATA_NAME
         );
+    }
+
+    public PlayerMailboxData getData() {
+        return data;
+    }
+
+    @Override
+    public @NotNull CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
+        data.writeToNBT(tag, provider);
+        return tag;
     }
 
     public void markDirty() {

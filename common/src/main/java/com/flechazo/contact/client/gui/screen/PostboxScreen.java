@@ -17,10 +17,8 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Inventory;
 
-import java.util.List;
 import java.util.Objects;
 
 public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler> {
@@ -69,7 +67,7 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
                 menu.status = 1;
             }
             if (menu.status == 1) {
-                EnquireAddresseeMessage packet = EnquireAddresseeMessage.create(menu.playerName, false);
+                EnquireAddresseeMessage packet = new EnquireAddresseeMessage(menu.playerName, false);
                 packet.sendToServer();
             }
         }
@@ -77,8 +75,8 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
 
     private void send() {
         if (menu.status == 1) {
-            if (isAddresseeValid() && menu.ticks.get(0) >= 0) {
-                EnquireAddresseeMessage packet = EnquireAddresseeMessage.create(menu.playerName, true);
+            if (isAddresseeValid() && menu.ticks.getFirst() >= 0) {
+                EnquireAddresseeMessage packet = new EnquireAddresseeMessage(menu.playerName, true);
                 packet.sendToServer();
             }
         } else if (menu.status == 2) {
@@ -88,7 +86,7 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
     }
 
     private boolean isAddresseeValid() {
-        return !menu.names.isEmpty() && Objects.equals(nameField.getValue(), menu.names.get(0));
+        return !menu.names.isEmpty() && Objects.equals(nameField.getValue(), menu.names.getFirst());
     }
 
     @Override
@@ -138,7 +136,7 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
 
             int z = 5000;
             if (size != 0) {
-                ResourceLocation texture = isRed ? RED_TEXTURE : GREEN_TEXTURE;
+                var texture = isRed ? RED_TEXTURE : GREEN_TEXTURE;
 //                RenderSystem.setShaderTexture(0, texture);
                 int renderWidth = maxWidth;
                 if (renderWidth == 55) {
@@ -185,7 +183,7 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
     protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int x, int y) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        ResourceLocation texture = isRed ? RED_TEXTURE : GREEN_TEXTURE;
+        var texture = isRed ? RED_TEXTURE : GREEN_TEXTURE;
         RenderSystem.setShaderTexture(0, texture);
 
         GuiHelper.drawLayer(guiGraphics.pose(), offsetX, offsetY, new TexturePos(0, 0, 176, 133));
@@ -200,17 +198,17 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
         guiGraphics.drawString(this.font, Component.translatable("info.contact.postbox.addressee"), 40, 30, 0xE6E6E6, false);
         switch (menu.status) {
             case 0 -> {
-                MutableComponent text = Component.translatable("info.contact.postbox.need_mail");
+                var text = Component.translatable("info.contact.postbox.need_mail");
                 renderTips(guiGraphics, text);
             }
             case 1 -> {
                 if (isAddresseeValid()) {
-                    int tick = menu.ticks.get(0);
+                    int tick = menu.ticks.getFirst();
                     if (tick < 0) {
-                        MutableComponent text = Component.translatable("info.contact.postbox.no_mailbox");
+                        var text = Component.translatable("info.contact.postbox.no_mailbox");
                         renderTips(guiGraphics, text);
                     } else {
-                        MutableComponent text = Component.translatable("info.contact.postbox.estimated");
+                        var text = Component.translatable("info.contact.postbox.estimated");
                         int width = this.font.width(text.getString());
                         int min = tick / 1200;
                         int sec = tick % 1200 / 20;
@@ -231,7 +229,7 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
                         }
                     }
                 } else {
-                    MutableComponent text = Component.translatable("info.contact.postbox.need_addressee");
+                    var text = Component.translatable("info.contact.postbox.need_addressee");
                     renderTips(guiGraphics, text);
 //                    MutableText text = Text.translatable("info.contact.postbox.need_addressee");
 //                    int width = this.textRenderer.getWidth(text.getString());
@@ -246,11 +244,11 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
                 }
             }
             case 2 -> {
-                MutableComponent text = Component.translatable("info.contact.postbox.success");
+                var text = Component.translatable("info.contact.postbox.success");
                 renderTips(guiGraphics, text);
             }
             case 3 -> {
-                MutableComponent text = Component.translatable("info.contact.postbox.cannot_send");
+                var text = Component.translatable("info.contact.postbox.cannot_send");
                 renderTips(guiGraphics, text);
             }
         }
@@ -259,7 +257,7 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
     private void renderTips(GuiGraphics guiGraphics, MutableComponent text) {
         int width = this.font.width(text.getString());
         if (width > 38) {
-            List<FormattedCharSequence> list = this.font.split(text, 50);
+            var list = this.font.split(text, 50);
             for (int i = 0; i < list.size(); i++) {
                 guiGraphics.drawString(this.font, list.get(i), 118, 38 - list.size() * 6 + i * 12, 0x1A1A1A, false);
             }

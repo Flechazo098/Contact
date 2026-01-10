@@ -102,5 +102,18 @@
   "contact.midnightconfig.postalSpeed": "Postal Ticks Per Block",
   "contact.midnightconfig.ticksToAnotherWorld": "Additional Ticks To Cross Dimension",
   "contact.midnightconfig.gui": "GUI Settings",
-  "contact.midnightconfig.showNewMailToast": "Enable New Mail Alert"
+  "contact.midnightconfig.showNewMailToast": "Enable New Mail Alert",
+  "config.contact.title": "Contact Config",
+  "config.contact.contact_common.title": "Contact Common Settings",
+  "config.contact.contact_common.blacklistID": "Parcel Blacklist",
+  "config.contact.contact_common.blacklistID.tooltip": "Item IDs forbidden to be mailed",
+  "config.contact.contact_common.postalSpeed": "Postal Ticks",
+  "config.contact.contact_common.postalSpeed.tooltip": "Speed of delivery (lower is faster)",
+  "config.contact.contact_common.ticksToAnotherWorld": "Additional Ticks To Cross Dimension",
+  "config.contact.contact_common.ticksToAnotherWorld.tooltip": "Extra time cost to deliver across dimensions",
+  "config.contact.contact_common.enableCenterMailbox": "Enable Center Mailbox",
+  "config.contact.contact_common.enableCenterMailbox.tooltip": "Enable shared central mailbox across the server",
+  "config.contact.contact_client.title": "Contact Client Settings",
+  "config.contact.contact_client.showNewMailToast": "Enable New Mail Alert",
+  "config.contact.contact_client.showNewMailToast.tooltip": "Show a toast when new mail is delivered"
 }

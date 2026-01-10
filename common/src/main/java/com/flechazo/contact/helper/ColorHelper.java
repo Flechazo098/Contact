@@ -32,12 +32,4 @@ public final class ColorHelper {
     public static float getAlphaF(int color) {
         return getAlpha(color) / 255.0F;
     }
-
-    public static int simplyMixColor(int color1, float alpha1, int color2, float alpha2) {
-        int red = (int) (getRed(color1) * alpha1 + getRed(color2) * alpha2);
-        int green = (int) (getGreen(color1) * alpha1 + getGreen(color2) * alpha2);
-        int blue = (int) (getBlue(color1) * alpha1 + getBlue(color2) * alpha2);
-        int alpha = (int) (getAlpha(color1) * alpha1 + getAlpha(color2) * alpha2);
-        return alpha << 24 | red << 16 | green << 8 | blue;
-    }
 }

@@ -8,8 +8,8 @@ import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class IconButton extends Button {
-    private boolean isPressed = false;
     protected final OnTooltip onTooltip;
+    private boolean isPressed = false;
 
     public IconButton(int x, int y, int width, int height, Component message, OnPress onPress) {
         super(x, y, width, height, message, onPress, DEFAULT_NARRATION);

@@ -1,8 +1,8 @@
 package com.flechazo.contact.data;
 
+import cc.sighs.oelib.data.api.DataDriven;
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.common.component.ContactDataComponents;
-import com.mafuyu404.oelib.api.data.DataDriven;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
@@ -23,6 +23,132 @@ public record PostcardStyle(
         TextInfo text,
         PostmarkInfo postmark
 ) {
+
+    public static final Codec<PostcardStyle> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    PostcardInfo.CODEC.fieldOf("postcard").forGetter(PostcardStyle::postcard),
+                    TradeInfo.CODEC.fieldOf("trade").forGetter(PostcardStyle::trade),
+                    TextInfo.CODEC.fieldOf("text").forGetter(PostcardStyle::text),
+                    PostmarkInfo.CODEC.fieldOf("postmark").forGetter(PostcardStyle::postmark)
+            ).apply(instance, PostcardStyle::new)
+    );
+    public static final PostcardStyle DEFAULT = new PostcardStyle(
+            new PostcardInfo("contact:stripes", 200, 133),
+            new TradeInfo(true, new ItemStack(Items.EMERALD)),
+            new TextInfo(10, 12, 180, 96, new ColorInfo(255, 183, 111, 64)),
+            new PostmarkInfo("contact:postmark", 142, -5, 64, 52, new ColorInfo(120, 182, 153, 104))
+    );
+
+    public static PostcardStyle fromNBT(CompoundTag tag) {
+        if (tag.contains("Info")) {
+            CompoundTag info = tag.getCompound("Info");
+            String id = "contact:" + info.getString("ID");
+            int posX = info.getInt("PosX");
+            int posY = info.getInt("PosY");
+            int textWidth = info.getInt("Width");
+            int textHeight = info.getInt("Height");
+            int color = info.getInt("Color");
+            return new PostcardStyle(
+                    new PostcardInfo(id, 200, 133),
+                    new TradeInfo(true, new ItemStack(Items.EMERALD)),
+                    new TextInfo(posX, posY, textWidth, textHeight,
+                            new ColorInfo((color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF)),
+                    new PostmarkInfo("contact:postmark", 142, -5, 64, 52,
+                            new ColorInfo((color >> 24) & 0xCD, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF))
+            );
+        }
+
+        if (tag.contains("CardID")) {
+            ResourceLocation cardID = ResourceLocation.parse(tag.getString("CardID"));
+            return PostcardDataManager.getPostcards().getOrDefault(cardID, DEFAULT);
+        }
+
+        return CODEC.parse(NbtOps.INSTANCE, tag)
+                .result()
+                .orElse(DEFAULT);
+    }
+
+    public static PostcardStyle fromItemStack(ItemStack itemStack) {
+        ResourceLocation styleId = itemStack.get(ContactDataComponents.POSTCARD_STYLE_ID.get());
+        if (styleId != null) {
+            return PostcardDataManager.getPostcards().getOrDefault(styleId, DEFAULT);
+        }
+        return DEFAULT;
+    }
+
+    public String cardTexture() {
+        return postcard.texture();
+    }
+
+    public int cardWidth() {
+        return postcard.width();
+    }
+
+    public int cardHeight() {
+        return postcard.height();
+    }
+
+    public ItemStack cardPrice() {
+        return trade.price();
+    }
+
+    public boolean soldByTrader() {
+        return trade.soldByTrader();
+    }
+
+    public int textPosX() {
+        return text.x();
+    }
+
+    public int textPosY() {
+        return text.y();
+    }
+
+    public int textWidth() {
+        return text.width();
+    }
+
+    public int textHeight() {
+        return text.height();
+    }
+
+    public int textColor() {
+        return text.color().toARGB();
+    }
+
+    public String postmarkTexture() {
+        return postmark.texture();
+    }
+
+    public int postmarkPosX() {
+        return postmark.x();
+    }
+
+    public int postmarkPosY() {
+        return postmark.y();
+    }
+
+    public int postmarkWidth() {
+        return postmark.width();
+    }
+
+    public int postmarkHeight() {
+        return postmark.height();
+    }
+
+    public int postmarkColor() {
+        return postmark.color().toARGB();
+    }
+
+    public ResourceLocation getCardTexture() {
+        ResourceLocation origin = ResourceLocation.parse(postcard.texture());
+        return ResourceLocation.fromNamespaceAndPath(origin.getNamespace(), "textures/postcard/" + origin.getPath() + ".png");
+    }
+
+    public ResourceLocation getPostmarkTexture() {
+        ResourceLocation origin = ResourceLocation.parse(postmark.texture());
+        return ResourceLocation.fromNamespaceAndPath(origin.getNamespace(), "textures/postcard/" + origin.getPath() + ".png");
+    }
 
     public record PostcardInfo(
             String texture,
@@ -106,132 +232,5 @@ public record PostcardStyle(
                         ColorInfo.CODEC.fieldOf("color").forGetter(PostmarkInfo::color)
                 ).apply(instance, PostmarkInfo::new)
         );
-    }
-
-    public static final Codec<PostcardStyle> CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(
-                    PostcardInfo.CODEC.fieldOf("postcard").forGetter(PostcardStyle::postcard),
-                    TradeInfo.CODEC.fieldOf("trade").forGetter(PostcardStyle::trade),
-                    TextInfo.CODEC.fieldOf("text").forGetter(PostcardStyle::text),
-                    PostmarkInfo.CODEC.fieldOf("postmark").forGetter(PostcardStyle::postmark)
-            ).apply(instance, PostcardStyle::new)
-    );
-
-    public static final PostcardStyle DEFAULT = new PostcardStyle(
-            new PostcardInfo("contact:stripes", 200, 133),
-            new TradeInfo(true, new ItemStack(Items.EMERALD)),
-            new TextInfo(10, 12, 180, 96, new ColorInfo(255, 183, 111, 64)),
-            new PostmarkInfo("contact:postmark", 142, -5, 64, 52, new ColorInfo(120, 182, 153, 104))
-    );
-
-    public String cardTexture() {
-        return postcard.texture();
-    }
-
-    public int cardWidth() {
-        return postcard.width();
-    }
-
-    public int cardHeight() {
-        return postcard.height();
-    }
-
-    public ItemStack cardPrice() {
-        return trade.price();
-    }
-
-    public boolean soldByTrader() {
-        return trade.soldByTrader();
-    }
-
-    public int textPosX() {
-        return text.x();
-    }
-
-    public int textPosY() {
-        return text.y();
-    }
-
-    public int textWidth() {
-        return text.width();
-    }
-
-    public int textHeight() {
-        return text.height();
-    }
-
-    public int textColor() {
-        return text.color().toARGB();
-    }
-
-    public String postmarkTexture() {
-        return postmark.texture();
-    }
-
-    public int postmarkPosX() {
-        return postmark.x();
-    }
-
-    public int postmarkPosY() {
-        return postmark.y();
-    }
-
-    public int postmarkWidth() {
-        return postmark.width();
-    }
-
-    public int postmarkHeight() {
-        return postmark.height();
-    }
-
-    public int postmarkColor() {
-        return postmark.color().toARGB();
-    }
-
-    public ResourceLocation getCardTexture() {
-        ResourceLocation origin = ResourceLocation.parse(postcard.texture());
-        return ResourceLocation.fromNamespaceAndPath(origin.getNamespace(), "textures/postcard/" + origin.getPath() + ".png");
-    }
-
-    public ResourceLocation getPostmarkTexture() {
-        ResourceLocation origin = ResourceLocation.parse(postmark.texture());
-        return ResourceLocation.fromNamespaceAndPath(origin.getNamespace(), "textures/postcard/" + origin.getPath() + ".png");
-    }
-
-    public static PostcardStyle fromNBT(CompoundTag tag) {
-        if (tag.contains("Info")) {
-            CompoundTag info = tag.getCompound("Info");
-            String id = "contact:" + info.getString("ID");
-            int posX = info.getInt("PosX");
-            int posY = info.getInt("PosY");
-            int textWidth = info.getInt("Width");
-            int textHeight = info.getInt("Height");
-            int color = info.getInt("Color");
-            return new PostcardStyle(
-                    new PostcardInfo(id, 200, 133),
-                    new TradeInfo(true, new ItemStack(Items.EMERALD)),
-                    new TextInfo(posX, posY, textWidth, textHeight,
-                            new ColorInfo((color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF)),
-                    new PostmarkInfo("contact:postmark", 142, -5, 64, 52,
-                            new ColorInfo((color >> 24) & 0xCD, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF))
-            );
-        }
-
-        if (tag.contains("CardID")) {
-            ResourceLocation cardID = ResourceLocation.parse(tag.getString("CardID"));
-            return PostcardDataManager.getPostcards().getOrDefault(cardID, DEFAULT);
-        }
-
-        return CODEC.parse(NbtOps.INSTANCE, tag)
-                .result()
-                .orElse(DEFAULT);
-    }
-
-    public static PostcardStyle fromItemStack(ItemStack itemStack) {
-        ResourceLocation styleId = itemStack.get(ContactDataComponents.POSTCARD_STYLE_ID.get());
-        if (styleId != null) {
-            return PostcardDataManager.getPostcards().getOrDefault(styleId, DEFAULT);
-        }
-        return DEFAULT;
     }
 }

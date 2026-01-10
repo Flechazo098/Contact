@@ -102,5 +102,18 @@
   "contact.midnightconfig.postalSpeed": "每格邮寄速度（ticks）",
   "contact.midnightconfig.ticksToAnotherWorld": "跨越维度的额外时间开销（ticks）",
   "contact.midnightconfig.gui": "界面设置",
-  "contact.midnightconfig.showNewMailToast": "新邮件提醒"
+  "contact.midnightconfig.showNewMailToast": "新邮件提醒",
+  "config.contact.title": "往来 模组配置",
+  "config.contact.contact_common.title": "往来 通用设置",
+  "config.contact.contact_common.blacklistID": "打包黑名单",
+  "config.contact.contact_common.blacklistID.tooltip": "禁止邮寄的物品 ID 列表",
+  "config.contact.contact_common.postalSpeed": "邮寄速度（ticks）",
+  "config.contact.contact_common.postalSpeed.tooltip": "邮件投递速度（值越小越快）",
+  "config.contact.contact_common.ticksToAnotherWorld": "跨维度的额外时间开销（ticks）",
+  "config.contact.contact_common.ticksToAnotherWorld.tooltip": "跨越维度邮寄所需的额外时间",
+  "config.contact.contact_common.enableCenterMailbox": "启用中央邮箱",
+  "config.contact.contact_common.enableCenterMailbox.tooltip": "启用服务器共享的中央邮箱",
+  "config.contact.contact_client.title": "往来 客户端设置",
+  "config.contact.contact_client.showNewMailToast": "新邮件提醒",
+  "config.contact.contact_client.showNewMailToast.tooltip": "收到新邮件时显示提示"
 }

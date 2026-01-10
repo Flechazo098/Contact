@@ -6,14 +6,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.ItemStack;
@@ -67,15 +64,15 @@ public class ReadOnlyTextBox extends AbstractWidget {
             List<EditableTextBox.Line> lines = Lists.newArrayList();
             MutableInt mutableint = new MutableInt();
             MutableBoolean mutableboolean = new MutableBoolean();
-            StringSplitter stringSplitter = this.font.getSplitter();
+            var stringSplitter = this.font.getSplitter();
             stringSplitter.splitLines(page, width, Style.EMPTY, true, (style, lineStartPos, lineEndPos) ->
             {
                 int lineCount = mutableint.getAndIncrement();
-                String lineTextRaw = page.substring(lineStartPos, lineEndPos);
+                var lineTextRaw = page.substring(lineStartPos, lineEndPos);
                 mutableboolean.setValue(lineTextRaw.endsWith("\n"));
-                String lineText = StringUtils.stripEnd(lineTextRaw, " \n");
+                var lineText = StringUtils.stripEnd(lineTextRaw, " \n");
                 int y = lineCount * spacing;
-                EditableTextBox.Point point = this.getPointPosInScreen(new EditableTextBox.Point(0, y));
+                var point = this.getPointPosInScreen(new EditableTextBox.Point(0, y));
                 intlist.add(lineStartPos);
                 lines.add(new EditableTextBox.Line(style, lineText, point.x(), point.y()));
             });

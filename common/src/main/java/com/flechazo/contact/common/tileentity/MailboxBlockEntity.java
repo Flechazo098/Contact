@@ -1,8 +1,7 @@
 package com.flechazo.contact.common.tileentity;
 
 import com.flechazo.contact.common.block.MailboxBlock;
-import com.flechazo.contact.common.storage.IMailboxDataProvider;
-import com.flechazo.contact.common.storage.MailboxDataManager;
+import com.flechazo.contact.platform.PlatformHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -13,8 +12,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-
-import java.util.List;
 
 import static com.flechazo.contact.common.block.MailboxBlock.OPEN;
 import static com.flechazo.contact.common.tileentity.BlockEntityTypeRegistry.MAILBOX_BLOCK_ENTITY;
@@ -28,6 +25,35 @@ public class MailboxBlockEntity extends BlockEntity {
 
     public MailboxBlockEntity(BlockPos pWorldPosition, BlockState pBlockState) {
         super(MAILBOX_BLOCK_ENTITY.get(), pWorldPosition, pBlockState);
+    }
+
+    public static void tick(Level level, BlockPos pos, BlockState state, MailboxBlockEntity blockEntity) {
+        if (!level.isClientSide) {
+            if (blockEntity.refreshTicks >= 0) {
+                blockEntity.refreshTicks--;
+            }
+            if (blockEntity.checkToSendTicks > 0) {
+                blockEntity.checkToSendTicks--;
+            }
+            if (blockEntity.needRefresh || blockEntity.refreshTicks == 0) {
+                blockEntity.refreshStatus();
+                var down = level.getBlockState(pos.below());
+                if (down.getBlock() instanceof MailboxBlock && down.getValue(OPEN) != blockEntity.isOpened) {
+                    level.setBlockAndUpdate(pos.below(), down.setValue(OPEN, blockEntity.isOpened));
+                    blockEntity.needRefresh = false;
+                } else {
+                    blockEntity.needRefresh = false;
+                    return;
+                }
+
+                if (state.getBlock() instanceof MailboxBlock) {
+                    level.setBlockAndUpdate(pos, state.setValue(OPEN, blockEntity.isOpened));
+                }
+            }
+        } else if (blockEntity.isOpened) {
+            blockEntity.angel++;
+            blockEntity.angel %= 40;
+        }
     }
 
     @Override
@@ -56,12 +82,10 @@ public class MailboxBlockEntity extends BlockEntity {
         }
     }
 
-
     public void refreshStatus() {
         if (!level.isClientSide) {
-            IMailboxDataProvider data = MailboxDataManager.getData(level);
             {
-                boolean now = !data.isMailboxEmpty(data.getMailboxOwner(level.dimension(), getBlockPos()));
+                boolean now = !PlatformHelper.isMailboxEmpty(PlatformHelper.getMailboxOwner(level.dimension(), getBlockPos()));
                 if (now != isOpened) {
                     needRefresh = true;
                     isOpened = now;
@@ -71,39 +95,10 @@ public class MailboxBlockEntity extends BlockEntity {
         }
     }
 
-    public static void tick(Level level, BlockPos pos, BlockState state, MailboxBlockEntity blockEntity) {
-        if (!level.isClientSide) {
-            if (blockEntity.refreshTicks >= 0) {
-                blockEntity.refreshTicks--;
-            }
-            if (blockEntity.checkToSendTicks > 0) {
-                blockEntity.checkToSendTicks--;
-            }
-            if (blockEntity.needRefresh || blockEntity.refreshTicks == 0) {
-                blockEntity.refreshStatus();
-                BlockState down = level.getBlockState(pos.below());
-                if (down.getBlock() instanceof MailboxBlock && down.getValue(OPEN) != blockEntity.isOpened) {
-                    level.setBlockAndUpdate(pos.below(), down.setValue(OPEN, blockEntity.isOpened));
-                    blockEntity.needRefresh = false;
-                } else {
-                    blockEntity.needRefresh = false;
-                    return;
-                }
-
-                if (state.getBlock() instanceof MailboxBlock) {
-                    level.setBlockAndUpdate(pos, state.setValue(OPEN, blockEntity.isOpened));
-                }
-            }
-        } else if (blockEntity.isOpened) {
-            blockEntity.angel++;
-            blockEntity.angel %= 40;
-        }
-    }
-
     private void refresh() {
         if (this.hasLevel() && !this.level.isClientSide) {
-            ClientboundBlockEntityDataPacket packet = ClientboundBlockEntityDataPacket.create(this);
-            List<ServerPlayer> players = ((ServerLevel) this.level).getChunkSource().chunkMap.getPlayers(new ChunkPos(this.getBlockPos().getX() >> 4, this.getBlockPos().getZ() >> 4), false);
+            var packet = ClientboundBlockEntityDataPacket.create(this);
+            var players = ((ServerLevel) this.level).getChunkSource().chunkMap.getPlayers(new ChunkPos(this.getBlockPos().getX() >> 4, this.getBlockPos().getZ() >> 4), false);
             for (ServerPlayer player : players) {
                 player.connection.send(packet);
             }

@@ -11,14 +11,13 @@ import net.minecraft.world.item.ItemStack;
 
 public class PackageTooltipComponent implements ClientTooltipComponent {
     public static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/gui/sprites/container/bundle/background.png");
-    private final NonNullList<ItemStack> contents;
-
     private static final TexturePos SLOT = TexturePos.create(0, 0, 18, 20);
     private static final TexturePos BORDER_VERTICAL = TexturePos.create(0, 18, 1, 20);
     private static final TexturePos BORDER_HORIZONTAL_TOP = TexturePos.create(0, 20, 18, 1);
     private static final TexturePos BORDER_HORIZONTAL_BOTTOM = TexturePos.create(0, 60, 18, 1);
     private static final TexturePos BORDER_CORNER_TOP = TexturePos.create(0, 20, 1, 1);
     private static final TexturePos BORDER_CORNER_BOTTOM = TexturePos.create(0, 60, 1, 1);
+    private final NonNullList<ItemStack> contents;
 
     public PackageTooltipComponent(PackageTooltipData data) {
         contents = data.contents();
@@ -49,7 +48,7 @@ public class PackageTooltipComponent implements ClientTooltipComponent {
         if (index >= 4) {
             return;
         }
-        ItemStack itemStack = this.contents.get(index);
+        var itemStack = this.contents.get(index);
         this.draw(guiGraphics, x, y, SLOT);
         guiGraphics.renderItem(itemStack, x + 1, y + 1, index);
         guiGraphics.renderItemDecorations(font, itemStack, x + 1, y + 1);

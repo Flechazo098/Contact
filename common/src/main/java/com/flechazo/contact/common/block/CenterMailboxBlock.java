@@ -3,19 +3,15 @@ package com.flechazo.contact.common.block;
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.common.config.ContactCommonConfig;
 import com.flechazo.contact.common.inter.ISilveroakEntry;
-import com.flechazo.contact.common.storage.IMailboxDataProvider;
-import com.flechazo.contact.common.storage.MailboxDataManager;
+import com.flechazo.contact.platform.PlatformHelper;
 import com.google.common.collect.Lists;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -32,9 +28,8 @@ public class CenterMailboxBlock extends NormalHorizontalBlock implements ISilver
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide) {
             if (ContactCommonConfig.isEnableCenterMailbox()) {
-                IMailboxDataProvider data = MailboxDataManager.getData(level);
-                if (data.getMailboxPos(player.getUUID()) == null) {
-                    SimpleContainer contents = data.getMailboxContents(player.getUUID());
+                if (PlatformHelper.getMailboxPos(player.getUUID()) == null) {
+                    var contents = PlatformHelper.getMailboxContents(player.getUUID());
                     boolean isEmpty = true;
                     for (int i = 0; i < contents.getContainerSize(); ++i) {
                         if (!contents.getItem(i).isEmpty()) {
@@ -43,7 +38,7 @@ public class CenterMailboxBlock extends NormalHorizontalBlock implements ISilver
                         }
                     }
 
-                    data.resetMailboxContents(player.getUUID());
+                    PlatformHelper.resetMailboxContents(player.getUUID());
                     if (!isEmpty) {
                         player.displayClientMessage(Component.translatable("message.contact.mailbox.pick_up"), true);
                     } else {

@@ -2,8 +2,8 @@ package com.flechazo.contact.client.gui.screen;
 
 import com.flechazo.contact.client.gui.hud.TexturePos;
 import com.flechazo.contact.client.widget.EditableTextBox;
-import com.flechazo.contact.helper.GuiHelper;
 import com.flechazo.contact.data.PostcardStyle;
+import com.flechazo.contact.helper.GuiHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -19,10 +19,10 @@ import net.minecraft.world.item.ItemStack;
 public class PostcardEditScreen extends Screen {
     private final PostcardStyle style;
     private final EditableTextBox textBox;
-    private Button buttonDone;
     private final ItemStack postcard;
     private final Player editingPlayer;
     private final InteractionHand hand;
+    private Button buttonDone;
 
     public PostcardEditScreen(ItemStack postcardIn, Player playerIn, InteractionHand handIn) {
         super(Component.empty());

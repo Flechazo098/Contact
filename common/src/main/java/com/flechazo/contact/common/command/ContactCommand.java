@@ -1,15 +1,14 @@
 package com.flechazo.contact.common.command;
 
+import cc.sighs.oelib.data.DataManager;
 import com.flechazo.contact.common.command.arguments.PostcardStyleArgument;
 import com.flechazo.contact.common.component.ContactDataComponents;
-import com.flechazo.contact.common.item.ItemRegistry;
 import com.flechazo.contact.common.item.ParcelItem;
 import com.flechazo.contact.common.item.PostcardItem;
-import com.flechazo.contact.common.storage.IMailboxDataProvider;
+import com.flechazo.contact.common.registry.ItemRegistry;
 import com.flechazo.contact.common.storage.MailToBeSent;
-import com.flechazo.contact.common.storage.MailboxDataManager;
-import com.flechazo.contact.platform.PlatformHelper;
 import com.flechazo.contact.data.PostcardDataManager;
+import com.flechazo.contact.platform.PlatformHelper;
 import com.google.common.collect.Sets;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -25,34 +24,30 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ContactCommand {
     private static final SuggestionProvider<CommandSourceStack> SUGGEST_PLAYERS = (context, builder) ->
     {
-        MinecraftServer server = PlatformHelper.getCurrentServer();
+        var server = DataManager.getServer();
         Set<String> set = Sets.newHashSet();
         if (server != null) {
-            IMailboxDataProvider data = MailboxDataManager.getData(server);
-            set.addAll(data.getNameToUUID().keySet());
+            set.addAll(PlatformHelper.getNameToUUID().keySet());
         }
         set.add("\"@e\"");
         return SharedSuggestionProvider.suggest(set, builder);
     };
     private static final SuggestionProvider<CommandSourceStack> SUGGEST_POSTCARDS = (context, builder) ->
     {
-        Set<ResourceLocation> collection = PostcardDataManager.getPostcards().keySet();
+        var collection = PostcardDataManager.getPostcards().keySet();
         return SharedSuggestionProvider.suggestResource(collection, builder);
     };
 
@@ -248,11 +243,10 @@ public class ContactCommand {
     }
 
     private static void deliverToPlayerMailbox(CommandSourceStack source, String target, int ticks, AtomicInteger n, ItemStack parcel) {
-        IMailboxDataProvider data = MailboxDataManager.getData(source.getServer());
-        UUID uuid = data.getNameToUUID().get(target);
+        var uuid = PlatformHelper.getNameToUUID().get(target);
         if (uuid != null) {
-            if (!data.isMailboxFull(uuid)) {
-                data.getMailList().add(new MailToBeSent(uuid, parcel, ticks));
+            if (!PlatformHelper.isMailboxFull(uuid)) {
+                PlatformHelper.getMailList().add(new MailToBeSent(uuid, parcel, ticks));
                 n.getAndIncrement();
             } else {
                 source.sendSuccess(() -> Component.translatable("command.contact.deliver.full", target), true);
@@ -266,10 +260,9 @@ public class ContactCommand {
         for (int i = 0; i < list.length; i++) {
             contents.setItem(i, list[i]);
         }
-        ItemStack parcel = ParcelItem.getParcel(contents, isEnder, sender);
+        var parcel = ParcelItem.getParcel(contents, isEnder, sender);
         if (target.equals("@e")) {
-            IMailboxDataProvider data = MailboxDataManager.getData(source.getServer());
-            data.getNameToUUID().keySet().forEach(name -> deliverToPlayerMailbox(source, name, ticks, n, parcel));
+            PlatformHelper.getNameToUUID().keySet().forEach(name -> deliverToPlayerMailbox(source, name, ticks, n, parcel));
         } else {
             deliverToPlayerMailbox(source, target, ticks, n, parcel);
         }
@@ -287,7 +280,7 @@ public class ContactCommand {
         for (int i = 0; i < list.length; i++) {
             contents.setItem(i, list[i]);
         }
-        ItemStack parcel = ParcelItem.getParcel(contents, isEnder, sender);
+        var parcel = ParcelItem.getParcel(contents, isEnder, sender);
 
         giveParcelToPlayers(targets, parcel);
 
@@ -304,12 +297,11 @@ public class ContactCommand {
         text = text.replace("\\n", "\n");
         AtomicInteger n = new AtomicInteger(0);
         if (target.equals("@e")) {
-            ItemStack postcard = PostcardItem.setText(PostcardItem.getPostcard(id, isEnder), text);
+            var postcard = PostcardItem.setText(PostcardItem.getPostcard(id, isEnder), text);
             postcard.set(ContactDataComponents.POSTCARD_SENDER.get(), sender);
-            IMailboxDataProvider data = MailboxDataManager.getData(source.getServer());
-            data.getNameToUUID().keySet().forEach(name -> deliverToPlayerMailbox(source, name, ticks, n, postcard));
+            PlatformHelper.getNameToUUID().keySet().forEach(name -> deliverToPlayerMailbox(source, name, ticks, n, postcard));
         } else {
-            ItemStack postcard = PostcardItem.setText(PostcardItem.getPostcard(id, false), text);
+            var postcard = PostcardItem.setText(PostcardItem.getPostcard(id, false), text);
             postcard.set(ContactDataComponents.POSTCARD_SENDER.get(), sender);
 
             deliverToPlayerMailbox(source, target, ticks, n, postcard);
@@ -324,7 +316,7 @@ public class ContactCommand {
     }
 
     private static int givePostcard(CommandSourceStack source, ResourceLocation postcardId, Collection<ServerPlayer> targets, String sender, boolean isEnderType, String text) {
-        ItemStack postcard = PostcardItem.getPostcard(postcardId, isEnderType);
+        var postcard = PostcardItem.getPostcard(postcardId, isEnderType);
         if (!sender.isEmpty()) {
             postcard.set(ContactDataComponents.POSTCARD_SENDER.get(), sender);
         }
@@ -346,7 +338,7 @@ public class ContactCommand {
         for (ServerPlayer serverPlayer : targets) {
             boolean flag = serverPlayer.getInventory().add(parcel);
             if (flag) {
-                ItemEntity itemEntity = serverPlayer.drop(parcel, false);
+                var itemEntity = serverPlayer.drop(parcel, false);
                 if (itemEntity != null) {
                     itemEntity.makeFakeItem();
                 }
@@ -354,7 +346,7 @@ public class ContactCommand {
                 serverPlayer.level().playSound(null, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, ((serverPlayer.getRandom().nextFloat() - serverPlayer.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
                 serverPlayer.inventoryMenu.broadcastChanges();
             } else {
-                ItemEntity itementity = serverPlayer.drop(parcel, false);
+                var itementity = serverPlayer.drop(parcel, false);
                 if (itementity != null) {
                     itementity.setNoPickUpDelay();
                     itementity.setThrower(serverPlayer);

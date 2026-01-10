@@ -1,8 +1,8 @@
 package com.flechazo.contact.common.item;
 
 import com.flechazo.contact.Contact;
-import com.flechazo.contact.client.item.PackageTooltipData;
 import com.flechazo.contact.common.component.ContactDataComponents;
+import com.flechazo.contact.common.registry.ItemRegistry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -15,7 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +29,15 @@ public class ParcelItem extends NormalItem implements IMailItem, IPackageItem {
         this.isEnderType = isEnderType;
     }
 
+    public static ItemStack getParcel(SimpleContainer contents, boolean isEnderType, String sender) {
+        ItemStack parcel = new ItemStack(isEnderType ? ItemRegistry.ENDER_PARCEL.get() : ItemRegistry.PARCEL.get());
+        parcel.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(contents.getItems()));
+        if (!sender.isEmpty()) {
+            parcel.set(ContactDataComponents.POSTCARD_SENDER.get(), sender);
+        }
+        return parcel;
+    }
+
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player user, InteractionHand hand) {
         IPackageItem.openPackage(this, user, hand);
@@ -38,7 +46,7 @@ public class ParcelItem extends NormalItem implements IMailItem, IPackageItem {
 
     @Override
     public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
-        PackageTooltipData data = IPackageItem.getTooltipData(this, stack);
+        var data = IPackageItem.getTooltipData(this, stack);
         return data.contents().isEmpty() ? Optional.empty() : Optional.of(data);
     }
 
@@ -50,15 +58,6 @@ public class ParcelItem extends NormalItem implements IMailItem, IPackageItem {
     @Override
     public boolean isEnderType() {
         return isEnderType;
-    }
-
-    public static ItemStack getParcel(SimpleContainer contents, boolean isEnderType, String sender) {
-        ItemStack parcel = new ItemStack(isEnderType ? ItemRegistry.ENDER_PARCEL.get() : ItemRegistry.PARCEL.get());
-        parcel.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(contents.getItems()));
-        if (!sender.isEmpty()) {
-            parcel.set(ContactDataComponents.POSTCARD_SENDER.get(), sender);
-        }
-        return parcel;
     }
 
     @Override

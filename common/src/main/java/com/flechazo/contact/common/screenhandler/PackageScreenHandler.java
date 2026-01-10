@@ -34,7 +34,7 @@ public abstract class PackageScreenHandler extends ContentScreenHandler {
                         getContainer().setItem(j, ItemStack.EMPTY);
                     }
 
-                    ItemStack cursor = this.getCarried();
+                    var cursor = this.getCarried();
                     if (!cursor.isEmpty()) {
                         player.drop(cursor, false);
                     }
@@ -49,7 +49,7 @@ public abstract class PackageScreenHandler extends ContentScreenHandler {
                         getContainer().setItem(i, ItemStack.EMPTY);
                     }
 
-                    ItemStack cursor = this.getCarried();
+                    var cursor = this.getCarried();
                     if (!cursor.isEmpty()) {
                         player.getInventory().placeItemBackInInventory(cursor);
                     }
@@ -60,7 +60,7 @@ public abstract class PackageScreenHandler extends ContentScreenHandler {
                     }
                 }
             } else {
-                ItemStack parcel = getPackedItem();
+                var parcel = getPackedItem();
                 parcel.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(getContainer().getItems()));
                 if (!player.isAlive() || ((ServerPlayer) player).hasDisconnected()) {
                     player.drop(parcel, false);

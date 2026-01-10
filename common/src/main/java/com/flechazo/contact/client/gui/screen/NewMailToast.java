@@ -1,6 +1,6 @@
 package com.flechazo.contact.client.gui.screen;
 
-import com.flechazo.contact.common.item.ItemRegistry;
+import com.flechazo.contact.common.registry.ItemRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,8 +12,6 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.List;
-
 @Environment(EnvType.CLIENT)
 public class NewMailToast implements Toast {
     private static final ResourceLocation BACKGROUND_SPRITE = ResourceLocation.withDefaultNamespace("toast/advancement");
@@ -22,7 +20,7 @@ public class NewMailToast implements Toast {
     public Visibility render(GuiGraphics guiGraphics, ToastComponent component, long ticks) {
         guiGraphics.blitSprite(BACKGROUND_SPRITE, 0, 0, this.width(), this.height());
 
-        List<FormattedCharSequence> list = component.getMinecraft().font.split(
+        var list = component.getMinecraft().font.split(
                 Component.translatable("info.contact.new_mail.desc"), 125
         );
         int titleColor = 0xFFFF00;

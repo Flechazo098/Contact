@@ -14,7 +14,7 @@ public interface IMailItem {
     boolean isEnderType();
 
     default void addSenderInfoTooltip(ItemStack stack, @Nullable Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag flag) {
-        String sender = stack.get(ContactDataComponents.POSTCARD_SENDER.get());
+        var sender = stack.get(ContactDataComponents.POSTCARD_SENDER.get());
         if (sender != null && !sender.isEmpty()) {
             tooltip.add(Component.translatable("tooltip.contact.mail.sender", sender).withStyle(ChatFormatting.GRAY));
         }

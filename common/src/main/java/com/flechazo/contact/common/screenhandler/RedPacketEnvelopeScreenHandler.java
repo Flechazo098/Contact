@@ -3,16 +3,15 @@ package com.flechazo.contact.common.screenhandler;
 import com.flechazo.contact.common.component.ContactDataComponents;
 import com.flechazo.contact.common.config.ContactCommonConfig;
 import com.flechazo.contact.common.item.IPackageItem;
-import com.flechazo.contact.common.item.ItemRegistry;
+import com.flechazo.contact.common.registry.ItemRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-import static com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry.RED_PACKET_ENVELOPE_CONTAINER;
+import static com.flechazo.contact.common.registry.ScreenHandlerTypeRegistry.RED_PACKET_ENVELOPE_CONTAINER;
 
 public class RedPacketEnvelopeScreenHandler extends PackageScreenHandler {
     public final static int CONTENT_COUNT = 1;
@@ -26,7 +25,7 @@ public class RedPacketEnvelopeScreenHandler extends PackageScreenHandler {
             public boolean mayPlace(ItemStack stack) {
                 if (stack.getItem() instanceof IPackageItem)
                     return false;
-                ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                var id = BuiltInRegistries.ITEM.getKey(stack.getItem());
                 return !ContactCommonConfig.getBlacklistID().contains(id.toString()) && !ContactCommonConfig.getBlacklistID().contains(id.getPath());
             }
         });
@@ -60,6 +59,7 @@ public class RedPacketEnvelopeScreenHandler extends PackageScreenHandler {
         }
         return redPacket;
     }
+
     @Override
     public boolean stillValid(Player player) {
         return true;

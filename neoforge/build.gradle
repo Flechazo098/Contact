@@ -37,9 +37,9 @@ repositories {
 dependencies {
     neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
 
-    modImplementation "dev.architectury:architectury-neoforge:$rootProject.architectury_api_version"
-    modImplementation "curse.maven:jupiter-1072905:6843052"
-    modImplementation "curse.maven:oelib-1319210:6882494"
+    modImplementation 'cc.sighs.oelib:OELib-neoforge-1.21.1:0.0.7'
+    forgeRuntimeLibrary("cn.6tail:lunar:1.7.3")
+    forgeRuntimeLibrary("de.marhali:json5-java:3.0.0")
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
     modRuntimeOnly("mezz.jei:jei-$rootProject.minecraft_version-neoforge:${jei_version}")

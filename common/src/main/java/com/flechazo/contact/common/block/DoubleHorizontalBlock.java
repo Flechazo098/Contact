@@ -58,7 +58,7 @@ public abstract class DoubleHorizontalBlock extends NormalHorizontalBlock {
     @Override
     @SuppressWarnings("deprecation")
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        DoubleBlockHalf doubleblockhalf = state.getValue(HALF);
+        var doubleblockhalf = state.getValue(HALF);
         if (direction.getAxis() == Direction.Axis.Y && doubleblockhalf == DoubleBlockHalf.LOWER == (direction == Direction.UP)) {
             return neighborState.is(this) && neighborState.getValue(HALF) != doubleblockhalf ? state.setValue(FACING, neighborState.getValue(FACING)) : Blocks.AIR.defaultBlockState();
         } else {
@@ -80,7 +80,7 @@ public abstract class DoubleHorizontalBlock extends NormalHorizontalBlock {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        BlockPos blockpos = ctx.getClickedPos();
+        var blockpos = ctx.getClickedPos();
         if (blockpos.getY() < 255 && ctx.getLevel().getBlockState(blockpos.above()).canBeReplaced(ctx)) {
             return super.getStateForPlacement(ctx).setValue(HALF, DoubleBlockHalf.LOWER);
         } else {
@@ -102,8 +102,8 @@ public abstract class DoubleHorizontalBlock extends NormalHorizontalBlock {
     @Override
     @SuppressWarnings("deprecation")
     public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
-        BlockPos blockpos = pos.below();
-        BlockState blockstate = world.getBlockState(blockpos);
+        var blockpos = pos.below();
+        var blockstate = world.getBlockState(blockpos);
         return state.getValue(HALF) == DoubleBlockHalf.LOWER ? blockstate.isFaceSturdy(world, blockpos, Direction.UP) : blockstate.is(this);
     }
 }
