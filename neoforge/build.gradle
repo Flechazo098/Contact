@@ -8,6 +8,17 @@ architectury {
 }
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
+    runs {
+        client2 {
+            client()
+            runDir = "run2"
+            programArgs "--username", "Flechazo"
+        }
+        client {
+            runDir = "run"
+            programArgs "--username", "TowerofSighs"
+        }
+    }
 }
 
 configurations {
@@ -37,7 +48,7 @@ repositories {
 dependencies {
     neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
 
-    modImplementation 'cc.sighs.oelib:OELib-neoforge-1.21.1:0.0.7'
+    modImplementation files('../libs/OELib-neoforge-1.21.1-0.1.2-hotfix.jar')
     forgeRuntimeLibrary("cn.6tail:lunar:1.7.3")
     forgeRuntimeLibrary("de.marhali:json5-java:3.0.0")
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }

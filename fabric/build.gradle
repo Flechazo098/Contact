@@ -8,6 +8,18 @@ architectury {
 }
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
+    runs {
+        client {
+            client()
+            runDir = "run"
+            programArgs "--username", "TowerofSighs"
+        }
+        client2 {
+            client()
+            runDir = "run2"
+            programArgs "--username", "Flechazo"
+        }
+    }
 }
 configurations {
     common {
@@ -30,7 +42,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
-    modImplementation 'cc.sighs.oelib:OELib-fabric-1.21.1:0.0.7'
+    modImplementation 'cc.sighs.oelib:OELib-fabric-1.21.1:0.1.2-hotfix'
     modImplementation("com.terraformersmc:modmenu:11.0.3")
     modRuntimeOnly("mezz.jei:jei-$rootProject.minecraft_version-fabric:${jei_version}")
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }

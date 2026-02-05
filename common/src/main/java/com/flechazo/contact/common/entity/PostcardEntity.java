@@ -34,6 +34,8 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 import static com.flechazo.contact.common.entity.EntityTypeRegistry.POSTCARD;
 
 public class PostcardEntity extends HangingEntity {
@@ -64,7 +66,7 @@ public class PostcardEntity extends HangingEntity {
 
     @Override
     protected void setDirection(Direction facing) {
-        Validate.notNull(facing);
+        Objects.requireNonNull(facing);
         this.direction = facing;
         if (facing.getAxis().isHorizontal()) {
             this.setXRot(0.0f);

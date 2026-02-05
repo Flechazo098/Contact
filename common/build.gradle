@@ -11,7 +11,7 @@ dependencies {
     // which get remapped to the correct annotations on each platform.
     // Do NOT use other classes from Fabric Loader.
     modCompileOnly "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-    modImplementation 'cc.sighs.oelib:OELib-common-api-1.21.1:0.0.7'
+    modImplementation 'cc.sighs.oelib:OELib-common-api-1.21.1:0.1.2-hotfix'
 }
 
 publishing {

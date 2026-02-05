@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
+import com.flechazo.contact.client.overlay.RedPacketOverlay;
 
 public class RedPacketItem extends NormalItem implements IMailItem, IPackageItem {
     public RedPacketItem() {
@@ -26,7 +27,13 @@ public class RedPacketItem extends NormalItem implements IMailItem, IPackageItem
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player user, InteractionHand hand) {
+        var stack = user.getItemInHand(hand);
+        String blessing = stack.get(ContactDataComponents.RED_PACKET_BLESSING.get());
+        String sender = stack.get(ContactDataComponents.POSTCARD_SENDER.get());
         IPackageItem.openPackage(this, user, hand);
+        if (level.isClientSide) {
+            RedPacketOverlay.INSTANCE.showWithBlessing(blessing == null ? "" : blessing, sender == null ? "" : sender);
+        }
         return InteractionResultHolder.success(ItemStack.EMPTY);
     }
 
