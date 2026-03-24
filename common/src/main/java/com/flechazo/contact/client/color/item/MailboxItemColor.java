@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.Block;
 public class MailboxItemColor implements ItemColor {
     @Override
     public int getColor(ItemStack itemStack, int tintIndex) {
-        Block block = Block.byItem(itemStack.getItem());
+        var block = Block.byItem(itemStack.getItem());
         if (block instanceof MailboxBlock) {
             if (tintIndex <= 1) {
                 return ((MailboxBlock) block).boxColor.getMapColor().col;

@@ -1,8 +1,7 @@
 package com.flechazo.contact.common.tileentity;
 
 import com.flechazo.contact.common.block.MailboxBlock;
-import com.flechazo.contact.common.storage.IMailboxDataProvider;
-import com.flechazo.contact.common.storage.MailboxDataManager;
+import com.flechazo.contact.platform.PlatformHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -58,9 +57,8 @@ public class MailboxBlockEntity extends BlockEntity {
 
     public void refreshStatus() {
         if (!level.isClientSide) {
-            IMailboxDataProvider data = MailboxDataManager.getData(level);
             {
-                boolean now = !data.isMailboxEmpty(data.getMailboxOwner(level.dimension(), getBlockPos()));
+                boolean now = !PlatformHelper.isMailboxEmpty(PlatformHelper.getMailboxOwner(level.dimension(), getBlockPos()));
                 if (now != isOpened) {
                     needRefresh = true;
                     isOpened = now;

@@ -1,8 +1,9 @@
 package com.flechazo.contact.common.item;
 
+import cc.sighs.oelib.registry.extra.MenuRegister;
 import com.flechazo.contact.Contact;
+import com.flechazo.contact.common.registry.ItemRegistry;
 import com.flechazo.contact.common.screenhandler.WrappingPaperScreenHandler;
-import dev.architectury.registry.menu.MenuRegistry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,7 +28,7 @@ public class WrappingPaperItem extends NormalItem {
         if (!world.isClientSide) {
             if (user instanceof ServerPlayer sp) {
                 boolean isEnder = itemStack.getItem() == ItemRegistry.ENDER_WRAPPING_PAPER.get();
-                MenuRegistry.openExtendedMenu(sp,
+                MenuRegister.openExtendedMenu(sp,
                         getContainer(isEnder),
                         buf -> buf.writeBoolean(isEnder)
                 );

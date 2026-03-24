@@ -1,19 +1,17 @@
 package com.flechazo.contact.forge;
 
+import cc.sighs.oelib.network.api.NetworkManager;
 import com.flechazo.contact.Contact;
-import com.flechazo.contact.resourse.PostcardDataManager;
-import com.flechazo.contact.resourse.PostcardStyle;
-import com.mafuyu404.oelib.forge.data.DataRegistry;
-import dev.architectury.platform.forge.EventBuses;
+import com.flechazo.contact.ContactClient;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(Contact.MOD_ID)
 public final class ContactForge {
     public ContactForge() {
-        EventBuses.registerModEventBus(Contact.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
-        DataRegistry.register(PostcardStyle.class);
-        PostcardDataManager.initialize();
+        NetworkManager.registerPacketScanPackage("com.flechazo.contact.network");
         Contact.init();
+        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ContactClient::onInitializeClient);
     }
 }

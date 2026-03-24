@@ -6,7 +6,21 @@ architectury {
     platformSetupLoomIde()
     fabric()
 }
-
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
+    runs {
+        client {
+            client()
+            runDir = "run"
+            programArgs "--username", "TowerofSighs"
+        }
+        client2 {
+            client()
+            runDir = "run2"
+            programArgs "--username", "Flechazo"
+        }
+    }
+}
 configurations {
     common {
         canBeResolved = true
@@ -28,19 +42,9 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
-
-    modImplementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
-    modImplementation "curse.maven:oelib-1319210:7060452"
-    modImplementation   "curse.maven:jupiter-1072905:6843040"
-
-    // Replace modImplementation with modApi if you expose components in your own API
-    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}"
-    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-world:${project.cca_version}"
-    // Copy the following only if you want to bundle Cardinal Components API as a Jar-in-Jar dependency
-    // (otherwise, you should configure the dependency on Modrinth/Curseforge)
-    include "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}"
-    include "dev.onyxstudios.cardinal-components-api:cardinal-components-world:${project.cca_version}"
-
+    modImplementation 'cc.sighs.oelib:OELib-fabric-1.20.1:0.2.2'
+    modImplementation("com.terraformersmc:modmenu:7.2.2")
+    modRuntimeOnly("mezz.jei:jei-$rootProject.minecraft_version-fabric:${jei_version}")
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 }
@@ -60,4 +64,19 @@ shadowJar {
 
 remapJar {
     input.set shadowJar.archiveFile
+}
+
+publishing {
+    publications {
+        mavenFabric(MavenPublication) {
+            artifactId = base.archivesName.get()
+            artifact(remapJar) {
+                builtBy tasks.remapJar
+                classifier null
+            }
+            artifact(tasks.sourcesJar) {
+                classifier "sources"
+            }
+        }
+    }
 }

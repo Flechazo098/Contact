@@ -53,7 +53,8 @@ public class RedPacketEnvelopeScreen extends AbstractContainerScreen<RedPacketEn
     }
 
     private void seal() {
-        ActionMessage packet = ActionMessage.create(0, menu.blessings);
+        var blessings = menu.blessings == null ? "" : menu.blessings;
+        ActionMessage packet = new ActionMessage(0, blessings);
         packet.sendToServer();
     }
 

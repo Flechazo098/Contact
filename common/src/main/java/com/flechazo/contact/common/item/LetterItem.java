@@ -2,6 +2,7 @@ package com.flechazo.contact.common.item;
 
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.client.item.PackageTooltipData;
+import com.flechazo.contact.common.registry.ItemRegistry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -44,15 +45,6 @@ public class LetterItem extends NormalItem implements IMailItem, IPackageItem {
     @Override
     public boolean isEnderType() {
         return false;
-    }
-
-    public static ItemStack getLetter(SimpleContainer contents, String sender) {
-        ItemStack letter = new ItemStack(ItemRegistry.LETTER.get());
-        letter.getOrCreateTag().put("parcel", contents.createTag());
-        if (!sender.isEmpty()) {
-            letter.getOrCreateTag().putString("Sender", sender);
-        }
-        return letter;
     }
 
     @Override

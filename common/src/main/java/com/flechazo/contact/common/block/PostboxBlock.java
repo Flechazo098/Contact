@@ -1,10 +1,10 @@
 package com.flechazo.contact.common.block;
 
+import cc.sighs.oelib.registry.extra.MenuRegister;
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.common.inter.ISilveroakEntry;
 import com.flechazo.contact.common.screenhandler.PostboxScreenHandler;
 import com.flechazo.contact.helper.VoxelShapeHelper;
-import dev.architectury.registry.menu.MenuRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -49,7 +49,7 @@ public class PostboxBlock extends DoubleHorizontalBlock implements ISilveroakEnt
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!level.isClientSide) {
             if (player instanceof ServerPlayer sp) {
-                MenuRegistry.openExtendedMenu(sp,
+                MenuRegister.openExtendedMenu(sp,
                         getContainer(isRed),
                         buf -> buf.writeBoolean(isRed)
                 );

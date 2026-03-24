@@ -1,6 +1,6 @@
 package com.flechazo.contact.common.command.arguments;
 
-import com.flechazo.contact.resourse.PostcardDataManager;
+import com.flechazo.contact.data.PostcardDataManager;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;

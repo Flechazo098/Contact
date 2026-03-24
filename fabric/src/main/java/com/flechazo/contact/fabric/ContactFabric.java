@@ -1,23 +1,32 @@
 package com.flechazo.contact.fabric;
 
+import cc.sighs.oelib.network.api.NetworkManager;
 import com.flechazo.contact.Contact;
-import com.flechazo.contact.common.config.ContactCommonConfig;
-import com.flechazo.contact.fabric.network.VersionCheckHandler;
-import com.flechazo.contact.resourse.PostcardDataManager;
-import com.flechazo.contact.resourse.PostcardStyle;
-import com.iafenvoy.jupiter.ConfigManager;
-import com.iafenvoy.jupiter.ServerConfigManager;
-import com.mafuyu404.oelib.fabric.data.DataRegistry;
+import com.flechazo.contact.common.handler.AddresseeSignInHandler;
+import com.flechazo.contact.common.handler.MailboxManager;
+import com.flechazo.contact.common.handler.WanderingTraderSaleHandler;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.world.InteractionResult;
 
 public final class ContactFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        ConfigManager.getInstance().registerConfigHandler(ContactCommonConfig.INSTANCE);
-        ConfigManager.getInstance().registerServerConfig(ContactCommonConfig.INSTANCE, ServerConfigManager.PermissionChecker.IS_OPERATOR);
-        VersionCheckHandler.registerServerMessage();
+        NetworkManager.registerPacketScanPackage("com.flechazo.contact.network");
         Contact.init();
-        DataRegistry.register(PostcardStyle.class);
-        PostcardDataManager.initialize();
+        ServerTickEvents.START_SERVER_TICK.register(MailboxManager::onServerTick);
+        UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+            var result = WanderingTraderSaleHandler.interact(player, entity, hand);
+            return switch (result) {
+                case SUCCESS -> InteractionResult.SUCCESS;
+                case FAIL -> InteractionResult.FAIL;
+                default -> InteractionResult.PASS;
+            };
+        });
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            AddresseeSignInHandler.onPlayerLoggedIn(handler.player);
+        });
     }
 }

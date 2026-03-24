@@ -12,8 +12,8 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-import static com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry.GREEN_POSTBOX_CONTAINER;
-import static com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry.RED_POSTBOX_CONTAINER;
+import static com.flechazo.contact.common.registry.ScreenHandlerTypeRegistry.GREEN_POSTBOX_CONTAINER;
+import static com.flechazo.contact.common.registry.ScreenHandlerTypeRegistry.RED_POSTBOX_CONTAINER;
 
 public class PostboxScreenHandler extends ContentScreenHandler {
     public final SimpleContainer parcel = new SimpleContainer(1);

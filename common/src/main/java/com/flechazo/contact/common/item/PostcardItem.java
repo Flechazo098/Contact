@@ -3,6 +3,7 @@ package com.flechazo.contact.common.item;
 import com.flechazo.contact.Contact;
 import com.flechazo.contact.client.ClientProxy;
 import com.flechazo.contact.common.entity.PostcardEntity;
+import com.flechazo.contact.common.registry.ItemRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

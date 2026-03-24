@@ -4,7 +4,7 @@ import com.flechazo.contact.client.ClientProxy;
 import com.flechazo.contact.common.entity.PostcardEntity;
 import com.flechazo.contact.common.item.PostcardItem;
 import com.flechazo.contact.helper.ColorHelper;
-import com.flechazo.contact.resourse.PostcardStyle;
+import com.flechazo.contact.data.PostcardStyle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;

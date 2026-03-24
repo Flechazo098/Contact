@@ -69,7 +69,7 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
                 menu.status = 1;
             }
             if (menu.status == 1) {
-                EnquireAddresseeMessage packet = EnquireAddresseeMessage.create(menu.playerName, false);
+                EnquireAddresseeMessage packet = new EnquireAddresseeMessage(menu.playerName, false);
                 packet.sendToServer();
             }
         }
@@ -78,7 +78,7 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
     private void send() {
         if (menu.status == 1) {
             if (isAddresseeValid() && menu.ticks.get(0) >= 0) {
-                EnquireAddresseeMessage packet = EnquireAddresseeMessage.create(menu.playerName, true);
+                EnquireAddresseeMessage packet = new EnquireAddresseeMessage(menu.playerName, true);
                 packet.sendToServer();
             }
         } else if (menu.status == 2) {
@@ -139,7 +139,7 @@ public class PostboxScreen extends AbstractContainerScreen<PostboxScreenHandler>
 
             int z = 5000;
             if (size != 0) {
-                ResourceLocation texture = isRed ? RED_TEXTURE : GREEN_TEXTURE;
+                var texture = isRed ? RED_TEXTURE : GREEN_TEXTURE;
 //                RenderSystem.setShaderTexture(0, texture);
                 int renderWidth = maxWidth;
                 if (renderWidth == 55) {

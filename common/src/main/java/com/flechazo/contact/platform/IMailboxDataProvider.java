@@ -1,5 +1,7 @@
-package com.flechazo.contact.common.storage;
+package com.flechazo.contact.platform;
 
+import com.flechazo.contact.common.storage.MailToBeSent;
+import com.flechazo.contact.common.storage.PlayerMailboxData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;

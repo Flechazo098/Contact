@@ -1,8 +1,8 @@
 package com.flechazo.contact.common.entity;
 
+import cc.sighs.oelib.registry.DeferredRegister;
+import cc.sighs.oelib.registry.RegisterSupplier;
 import com.flechazo.contact.Contact;
-import dev.architectury.registry.registries.DeferredRegister;
-import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -12,8 +12,8 @@ import java.util.function.Supplier;
 
 public final class EntityTypeRegistry {
 
-    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Contact.MOD_ID, Registries.ENTITY_TYPE);
-    public static final RegistrySupplier<EntityType<PostcardEntity>> POSTCARD = register("postcard", () -> {
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, Contact.MOD_ID);
+    public static final RegisterSupplier<EntityType<PostcardEntity>> POSTCARD = register("postcard", () -> {
         EntityType.Builder<PostcardEntity> builder = EntityType.Builder.of(PostcardEntity::new, MobCategory.MISC);
         builder.sized(0.5f, 0.5f)
                 .clientTrackingRange(10)
@@ -21,10 +21,7 @@ public final class EntityTypeRegistry {
         return builder.build("postcard");
     });
 
-    private static <T extends Entity> RegistrySupplier<EntityType<T>> register(String name, Supplier<EntityType<T>> entity) {
+    private static <T extends Entity> RegisterSupplier<EntityType<T>> register(String name, Supplier<EntityType<T>> entity) {
         return ENTITY_TYPES.register(name, entity);
-    }
-
-    public static void init() {
     }
 }

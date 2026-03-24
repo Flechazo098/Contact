@@ -42,7 +42,7 @@ public class WrappingPaperScreen extends AbstractContainerScreen<WrappingPaperSc
     }
 
     private void pack() {
-        ActionMessage packet = ActionMessage.create(0);
+        ActionMessage packet = new ActionMessage(0, "");
         packet.sendToServer();
     }
 

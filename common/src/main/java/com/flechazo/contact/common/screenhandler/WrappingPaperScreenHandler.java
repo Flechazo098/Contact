@@ -2,7 +2,7 @@ package com.flechazo.contact.common.screenhandler;
 
 import com.flechazo.contact.common.config.ContactCommonConfig;
 import com.flechazo.contact.common.item.IPackageItem;
-import com.flechazo.contact.common.item.ItemRegistry;
+import com.flechazo.contact.common.registry.ItemRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-import static com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry.WRAPPING_PAPER_CONTAINER;
+import static com.flechazo.contact.common.registry.ScreenHandlerTypeRegistry.WRAPPING_PAPER_CONTAINER;
 
 public class WrappingPaperScreenHandler extends PackageScreenHandler {
     public final static int CONTENT_COUNT = 4;

@@ -1,7 +1,9 @@
 package com.flechazo.contact.client.gui.screen;
 
-import com.flechazo.contact.common.item.ItemRegistry;
+import com.flechazo.contact.common.registry.ItemRegistry;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
@@ -12,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class NewMailToast implements Toast {
     @Override
     public Visibility render(GuiGraphics guiGraphics, ToastComponent component, long ticks) {

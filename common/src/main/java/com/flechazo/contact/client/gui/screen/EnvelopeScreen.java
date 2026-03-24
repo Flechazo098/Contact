@@ -33,17 +33,21 @@ public class EnvelopeScreen extends AbstractContainerScreen<EnvelopeScreenHandle
         this.offsetX = (this.width - 176) / 2;
         this.offsetY = (this.height - 166) / 2 + 16;
 
-        this.buttonPack = addRenderableWidget(new IconButton(offsetX + 100, offsetY + 16, 18, 19, Component.translatable("tooltip.contact.envelope.seal"), button -> seal(), this::buttonTooltip));
+        this.buttonPack = addRenderableWidget(new IconButton(
+                offsetX + 100, offsetY + 16, 18, 19,
+                Component.translatable("tooltip.contact.envelope.seal"),
+                button -> seal(), this::buttonTooltip));
     }
 
     private void buttonTooltip(Button button, GuiGraphics guiGraphics, int mouseX, int mouseY) {
         if (button.isHovered()) {
-            GuiHelper.drawTooltip(guiGraphics, mouseX, mouseY, button.getX(), button.getY(), button.getWidth(), button.getHeight(), Lists.newArrayList(button.getMessage()));
+            GuiHelper.drawTooltip(guiGraphics, mouseX, mouseY, button.getX(), button.getY(), button.getWidth(),
+                    button.getHeight(), Lists.newArrayList(button.getMessage()));
         }
     }
 
     private void seal() {
-        ActionMessage packet = ActionMessage.create(0);
+        ActionMessage packet = new ActionMessage(0, "");
         packet.sendToServer();
     }
 

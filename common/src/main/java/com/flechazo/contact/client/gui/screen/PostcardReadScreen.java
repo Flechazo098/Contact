@@ -4,7 +4,7 @@ import com.flechazo.contact.client.gui.hud.TexturePos;
 import com.flechazo.contact.client.widget.ReadOnlyTextBox;
 import com.flechazo.contact.helper.ColorHelper;
 import com.flechazo.contact.helper.GuiHelper;
-import com.flechazo.contact.resourse.PostcardStyle;
+import com.flechazo.contact.data.PostcardStyle;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -24,14 +24,7 @@ public class PostcardReadScreen extends Screen {
     public PostcardReadScreen(ItemStack postcardIn) {
         super(Component.empty());
         this.postcard = postcardIn;
-        CompoundTag compoundTag = postcardIn.getOrCreateTag();
-        if (compoundTag != null) {
-            if (compoundTag.contains("Info")) {
-                style = PostcardStyle.fromNBT(compoundTag);
-            } else if (compoundTag.contains("CardID")) {
-                style = PostcardStyle.fromNBT(compoundTag);
-            } else style = PostcardStyle.DEFAULT;
-        } else style = PostcardStyle.DEFAULT;
+        this.style = PostcardStyle.fromItemStack(postcardIn);
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.flechazo.contact.common.storage;
 
+import cc.sighs.oelib.platform.Platform;
 import com.flechazo.contact.common.tileentity.MailboxBlockEntity;
 import com.flechazo.contact.network.ActionMessage;
-import com.flechazo.contact.platform.PlatformHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.core.BlockPos;
@@ -74,9 +74,9 @@ public class PlayerMailboxData {
                 if (mailbox.getItem(i).isEmpty()) {
                     mailbox.setItem(i, parcelIn);
                     setMailboxContents(uuid, mailbox);
-                    ServerPlayer player = PlatformHelper.getCurrentServer().getPlayerList().getPlayer(uuid);
+                    ServerPlayer player = Platform.getCurrentServer().getPlayerList().getPlayer(uuid);
                     if (player != null) {
-                        ActionMessage packet = ActionMessage.create(0);
+                        ActionMessage packet = new ActionMessage(0, "");
                         packet.sendTo(player);
                     }
                     return true;
@@ -112,7 +112,7 @@ public class PlayerMailboxData {
 
         if (oldPos != null) {
             locationToPlayer.remove(oldPos);
-            Level oldLevel = PlatformHelper.getCurrentServer().getLevel(oldPos.dimension());
+            Level oldLevel = Platform.getCurrentServer().getLevel(oldPos.dimension());
             if (oldLevel != null && oldLevel.hasChunkAt(oldPos.pos())) {
                 BlockEntity oldTE = oldLevel.getBlockEntity(oldPos.pos());
                 if (oldTE instanceof MailboxBlockEntity) {
@@ -123,7 +123,7 @@ public class PlayerMailboxData {
         uuidToLocation.put(uuid, newPos);
         locationToPlayer.put(newPos, uuid);
 
-        Level newWorld = PlatformHelper.getCurrentServer().getLevel(level);
+        Level newWorld = Platform.getCurrentServer().getLevel(level);
         if (newWorld != null && newWorld.hasChunkAt(newPos.pos())) {
             BlockEntity newTE = newWorld.getBlockEntity(newPos.pos());
             if (newTE instanceof MailboxBlockEntity) {

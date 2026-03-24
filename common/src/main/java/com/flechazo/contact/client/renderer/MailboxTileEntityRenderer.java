@@ -1,6 +1,6 @@
 package com.flechazo.contact.client.renderer;
 
-import com.flechazo.contact.common.item.ItemRegistry;
+import com.flechazo.contact.common.registry.ItemRegistry;
 import com.flechazo.contact.common.tileentity.MailboxBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;

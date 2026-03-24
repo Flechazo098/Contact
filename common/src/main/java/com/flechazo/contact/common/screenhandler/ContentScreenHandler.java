@@ -3,7 +3,6 @@ package com.flechazo.contact.common.screenhandler;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +13,7 @@ public abstract class ContentScreenHandler extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        Slot slot = this.slots.get(index);
+        var slot = this.slots.get(index);
 
         if (!slot.hasItem()) {
             return ItemStack.EMPTY;

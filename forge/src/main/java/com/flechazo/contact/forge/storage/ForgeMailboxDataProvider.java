@@ -1,8 +1,9 @@
 package com.flechazo.contact.forge.storage;
 
-import com.flechazo.contact.common.storage.IMailboxDataProvider;
+import cc.sighs.oelib.platform.Platform;
 import com.flechazo.contact.common.storage.MailToBeSent;
 import com.flechazo.contact.common.storage.PlayerMailboxData;
+import com.flechazo.contact.platform.IMailboxDataProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
@@ -15,73 +16,91 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public record ForgeMailboxDataProvider(PlayerMailboxData data) implements IMailboxDataProvider {
+public class ForgeMailboxDataProvider implements IMailboxDataProvider {
 
-    // 实现所有接口方法，与 Fabric 版本相同
+    private PlayerMailboxData getData() {
+        var server = Platform.getCurrentServer();
+        var overworld = server.getLevel(Level.OVERWORLD);
+        if (overworld == null) {
+            return null;
+        }
+        return overworld.getCapability(MailboxDataCapability.MAILBOX_DATA)
+                .resolve()
+                .orElse(null);
+    }
+
+    public ForgeMailboxDataProvider() {
+    }
+
+    @Override
+    public PlayerMailboxData data() {
+        return getData();
+    }
+
     @Override
     public Map<String, UUID> getNameToUUID() {
-        return data.nameToUUID;
+        return getData().nameToUUID;
     }
 
     @Override
     public Map<UUID, SimpleContainer> getUuidToContents() {
-        return data.uuidToContents;
+        return getData().uuidToContents;
     }
 
     @Override
     public List<MailToBeSent> getMailList() {
-        return data.mailList;
+        return getData().mailList;
     }
 
     @Override
     public SimpleContainer getMailboxContents(UUID uuid) {
-        return data.getMailboxContents(uuid);
+        return getData().getMailboxContents(uuid);
     }
 
     @Override
     public boolean isMailboxEmpty(UUID uuid) {
-        return data.isMailboxEmpty(uuid);
+        return getData().isMailboxEmpty(uuid);
     }
 
     @Override
     public boolean isMailboxFull(UUID uuid) {
-        return data.isMailboxFull(uuid);
+        return getData().isMailboxFull(uuid);
     }
 
     @Override
     public boolean addMailboxContents(UUID uuid, ItemStack parcelIn) {
-        return data.addMailboxContents(uuid, parcelIn);
+        return getData().addMailboxContents(uuid, parcelIn);
     }
 
     @Override
     public void setMailboxContents(UUID uuid, SimpleContainer contents) {
-        data.setMailboxContents(uuid, contents);
+        getData().setMailboxContents(uuid, contents);
     }
 
     @Override
     public void resetMailboxContents(UUID uuid) {
-        data.resetMailboxContents(uuid);
+        getData().resetMailboxContents(uuid);
     }
 
     @Override
     @Nullable
     public UUID getMailboxOwner(ResourceKey<Level> level, BlockPos pos) {
-        return data.getMailboxOwner(level, pos);
+        return getData().getMailboxOwner(level, pos);
     }
 
     @Override
     @Nullable
     public GlobalPos getMailboxPos(UUID uuid) {
-        return data.getMailboxPos(uuid);
+        return getData().getMailboxPos(uuid);
     }
 
     @Override
     public void setMailboxData(UUID uuid, ResourceKey<Level> level, BlockPos pos) {
-        data.setMailboxData(uuid, level, pos);
+        getData().setMailboxData(uuid, level, pos);
     }
 
     @Override
     public void removeMailboxData(GlobalPos pos) {
-        data.removeMailboxData(pos);
+        getData().removeMailboxData(pos);
     }
 }

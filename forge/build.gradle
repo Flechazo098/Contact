@@ -7,6 +7,21 @@ architectury {
     forge()
 }
 
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
+    runs {
+        client2 {
+            client()
+            runDir = "run2"
+            programArgs "--username", "Flechazo"
+        }
+        client {
+            runDir = "run"
+            programArgs "--username", "TowerofSighs"
+        }
+    }
+}
+
 configurations {
     common {
         canBeResolved = true
@@ -27,13 +42,12 @@ configurations {
 dependencies {
     forge "net.minecraftforge:forge:$rootProject.forge_version"
 
-    modImplementation "dev.architectury:architectury-forge:$rootProject.architectury_api_version"
-
+    modImplementation 'cc.sighs.oelib:OELib-forge-1.20.1:0.2.2'
+    forgeRuntimeLibrary("cn.6tail:lunar:1.7.3")
+    forgeRuntimeLibrary("de.marhali:json5-java:3.0.0")
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
-    modImplementation "curse.maven:oelib-1319210:7060455"
-    modRuntimeOnly("mezz.jei:jei-1.20.1-forge:15.20.0.104")
-    modImplementation "curse.maven:jupiter-1072905:6843043"
+    modRuntimeOnly("mezz.jei:jei-$rootProject.minecraft_version-forge:${jei_version}")
 }
 
 processResources {
@@ -51,4 +65,19 @@ shadowJar {
 
 remapJar {
     input.set shadowJar.archiveFile
+}
+
+publishing {
+    publications {
+        mavenForge(MavenPublication) {
+            artifactId = base.archivesName.get()
+            artifact(remapJar) {
+                builtBy tasks.remapJar
+                classifier null
+            }
+            artifact(tasks.sourcesJar) {
+                classifier "sources"
+            }
+        }
+    }
 }

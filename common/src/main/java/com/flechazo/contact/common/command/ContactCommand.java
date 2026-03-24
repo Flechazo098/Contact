@@ -1,14 +1,13 @@
 package com.flechazo.contact.common.command;
 
+import cc.sighs.oelib.platform.Platform;
 import com.flechazo.contact.common.command.arguments.PostcardStyleArgument;
-import com.flechazo.contact.common.item.ItemRegistry;
+import com.flechazo.contact.common.registry.ItemRegistry;
 import com.flechazo.contact.common.item.ParcelItem;
 import com.flechazo.contact.common.item.PostcardItem;
-import com.flechazo.contact.common.storage.IMailboxDataProvider;
 import com.flechazo.contact.common.storage.MailToBeSent;
-import com.flechazo.contact.common.storage.MailboxDataManager;
+import com.flechazo.contact.data.PostcardDataManager;
 import com.flechazo.contact.platform.PlatformHelper;
-import com.flechazo.contact.resourse.PostcardDataManager;
 import com.google.common.collect.Sets;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -24,7 +23,6 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -40,11 +38,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ContactCommand {
     private static final SuggestionProvider<CommandSourceStack> SUGGEST_PLAYERS = (context, builder) ->
     {
-        MinecraftServer server = PlatformHelper.getCurrentServer();
+        var server = Platform.getCurrentServer();
         Set<String> set = Sets.newHashSet();
         if (server != null) {
-            IMailboxDataProvider data = MailboxDataManager.getData(server);
-            set.addAll(data.getNameToUUID().keySet());
+            set.addAll(PlatformHelper.getNameToUUID().keySet());
         }
         set.add("\"@e\"");
         return SharedSuggestionProvider.suggest(set, builder);
@@ -247,11 +244,10 @@ public class ContactCommand {
     }
 
     private static void deliverToPlayerMailbox(CommandSourceStack source, String target, int ticks, AtomicInteger n, ItemStack parcel) {
-        IMailboxDataProvider data = MailboxDataManager.getData(source.getServer());
-        UUID uuid = data.getNameToUUID().get(target);
+        var uuid = PlatformHelper.getNameToUUID().get(target);
         if (uuid != null) {
-            if (!data.isMailboxFull(uuid)) {
-                data.getMailList().add(new MailToBeSent(uuid, parcel, ticks));
+            if (!PlatformHelper.isMailboxFull(uuid)) {
+                PlatformHelper.getMailList().add(new MailToBeSent(uuid, parcel, ticks));
                 n.getAndIncrement();
             } else {
                 source.sendSuccess(() -> Component.translatable("command.contact.deliver.full", target), true);
@@ -267,8 +263,7 @@ public class ContactCommand {
         }
         ItemStack parcel = ParcelItem.getParcel(contents, isEnder, sender);
         if (target.equals("@e")) {
-            IMailboxDataProvider data = MailboxDataManager.getData(source.getServer());
-            data.getNameToUUID().keySet().forEach(name -> deliverToPlayerMailbox(source, name, ticks, n, parcel));
+            PlatformHelper.getNameToUUID().keySet().forEach(name -> deliverToPlayerMailbox(source, name, ticks, n, parcel));
         } else {
             deliverToPlayerMailbox(source, target, ticks, n, parcel);
         }
@@ -305,8 +300,7 @@ public class ContactCommand {
         if (target.equals("@e")) {
             ItemStack postcard = PostcardItem.setText(PostcardItem.getPostcard(id, isEnder), text);
             postcard.getOrCreateTag().putString("Sender", sender);
-            IMailboxDataProvider data = MailboxDataManager.getData(source.getServer());
-            data.getNameToUUID().keySet().forEach(name -> deliverToPlayerMailbox(source, name, ticks, n, postcard));
+            PlatformHelper.getNameToUUID().keySet().forEach(name -> deliverToPlayerMailbox(source, name, ticks, n, postcard));
         } else {
             ItemStack postcard = PostcardItem.setText(PostcardItem.getPostcard(id, false), text);
             postcard.getOrCreateTag().putString("Sender", sender);

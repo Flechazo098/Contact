@@ -1,15 +1,12 @@
 package com.flechazo.contact.client;
 
+import cc.sighs.oelib.registry.extra.RenderTypeRegister;
 import com.flechazo.contact.client.gui.screen.NewMailToast;
 import com.flechazo.contact.client.gui.screen.PostcardEditScreen;
 import com.flechazo.contact.client.gui.screen.PostcardReadScreen;
-import com.flechazo.contact.client.renderer.PostcardEntityRenderer;
 import com.flechazo.contact.common.config.ContactClientConfig;
-import com.flechazo.contact.common.entity.EntityTypeRegistry;
-import com.flechazo.contact.platform.PlatformHelper;
-import com.flechazo.contact.resourse.PostcardStyle;
+import com.flechazo.contact.data.PostcardStyle;
 import com.google.common.collect.Maps;
-import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.InteractionHand;
@@ -40,7 +37,7 @@ public class ClientProxy {
     }
 
     public static void registerCutoutRenderLayer(Supplier<Block> block) {
-        PlatformHelper.setRenderLayer(block);
+        RenderTypeRegister.registerBlocks(RenderType.cutout(), block);
     }
 
     public static RenderType getPostcardCardRenderLayer(PostcardStyle style) {

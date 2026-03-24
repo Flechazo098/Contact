@@ -1,26 +1,17 @@
 package com.flechazo.contact;
 
-import com.flechazo.contact.common.block.BlockRegistry;
+import cc.sighs.oelib.data.DataRegistry;
+import cc.sighs.oelib.network.api.NetworkManager;
+import cc.sighs.oelib.registry.extra.CommandRegister;
 import com.flechazo.contact.common.command.ContactCommand;
 import com.flechazo.contact.common.config.ContactCommonConfig;
 import com.flechazo.contact.common.entity.EntityTypeRegistry;
-import com.flechazo.contact.common.handler.AddresseeSignInHandler;
-import com.flechazo.contact.common.handler.MailboxManager;
-import com.flechazo.contact.common.handler.WanderingTraderSaleHandler;
-import com.flechazo.contact.common.item.ItemRegistry;
+import com.flechazo.contact.common.registry.BlockRegistry;
+import com.flechazo.contact.common.registry.ItemRegistry;
 import com.flechazo.contact.common.registry.ModCreativeTabRegistry;
-import com.flechazo.contact.common.screenhandler.ScreenHandlerTypeRegistry;
+import com.flechazo.contact.common.registry.ScreenHandlerTypeRegistry;
 import com.flechazo.contact.common.tileentity.BlockEntityTypeRegistry;
-import com.flechazo.contact.network.ActionMessage;
-import com.flechazo.contact.network.EnquireAddresseeMessage;
-import com.flechazo.contact.network.PostcardEditMessage;
-import com.flechazo.contact.network.TextBoxEditMessage;
-import com.iafenvoy.jupiter.ConfigManager;
-import com.iafenvoy.jupiter.ServerConfigManager;
-import dev.architectury.event.events.common.CommandRegistrationEvent;
-import dev.architectury.event.events.common.InteractionEvent;
-import dev.architectury.event.events.common.PlayerEvent;
-import dev.architectury.event.events.common.TickEvent;
+import com.flechazo.contact.data.PostcardStyle;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -54,23 +45,14 @@ public final class Contact {
     }
 
     public static void init() {
-        ConfigManager.getInstance().registerConfigHandler(ContactCommonConfig.INSTANCE);
-        ConfigManager.getInstance().registerServerConfig(ContactCommonConfig.INSTANCE, ServerConfigManager.PermissionChecker.IS_OPERATOR);
-
+        ContactCommonConfig.register();
+        DataRegistry.register(PostcardStyle.class, PostcardStyle.CODEC);
         BlockRegistry.BLOCKS.register();
         BlockEntityTypeRegistry.BLOCK_ENTITY_TYPES.register();
         EntityTypeRegistry.ENTITY_TYPES.register();
         ModCreativeTabRegistry.CREATIVE_TABS.register();
         ItemRegistry.ITEMS.register();
         ScreenHandlerTypeRegistry.MENU_TYPES.register();
-        CommandRegistrationEvent.EVENT.register(ContactCommand::register);
-        TickEvent.SERVER_PRE.register(MailboxManager::onServerTick);
-        InteractionEvent.INTERACT_ENTITY.register(WanderingTraderSaleHandler::interact);
-        PlayerEvent.PLAYER_JOIN.register(AddresseeSignInHandler::onPlayerLoggedIn);
-
-        ActionMessage.registerC2S();
-        EnquireAddresseeMessage.registerC2S();
-        PostcardEditMessage.registerC2S();
-        TextBoxEditMessage.registerC2S();
+        CommandRegister.registerServer(ContactCommand::register);
     }
 }

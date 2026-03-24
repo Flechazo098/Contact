@@ -3,7 +3,7 @@ package com.flechazo.contact.client.gui.screen;
 import com.flechazo.contact.client.gui.hud.TexturePos;
 import com.flechazo.contact.client.widget.EditableTextBox;
 import com.flechazo.contact.helper.GuiHelper;
-import com.flechazo.contact.resourse.PostcardStyle;
+import com.flechazo.contact.data.PostcardStyle;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -19,24 +19,17 @@ import net.minecraft.world.item.ItemStack;
 public class PostcardEditScreen extends Screen {
     private final PostcardStyle style;
     private final EditableTextBox textBox;
-    private Button buttonDone;
     private final ItemStack postcard;
     private final Player editingPlayer;
     private final InteractionHand hand;
+    private Button buttonDone;
 
     public PostcardEditScreen(ItemStack postcardIn, Player playerIn, InteractionHand handIn) {
         super(Component.empty());
         this.postcard = postcardIn;
         this.editingPlayer = playerIn;
         this.hand = handIn;
-        CompoundTag tag = postcardIn.getTag();
-        if (tag != null) {
-            if (tag.contains("Info")) {
-                style = PostcardStyle.fromNBT(tag);
-            } else if (tag.contains("CardID")) {
-                style = PostcardStyle.fromNBT(tag);
-            } else style = PostcardStyle.DEFAULT;
-        } else style = PostcardStyle.DEFAULT;
+        this.style = PostcardStyle.fromItemStack(postcardIn);
         this.textBox = this.addRenderableOnly(new EditableTextBox(postcard, editingPlayer, hand,
                 (this.width - style.cardWidth()) / 2 + style.textPosX(), (this.height - style.cardHeight() - 30) / 2 + style.textPosY(), style.textWidth(), style.textHeight(),
                 12, style.textColor(), Component.literal("Postcard")));
